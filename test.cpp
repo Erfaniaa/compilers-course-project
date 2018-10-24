@@ -9,7 +9,9 @@ int main() {
 		double c = 10;
 	}
 	else {
-		float d = 40;
+		float d = .123 + 40.56;
+		b--;
+		a ++ ;
 	}
 	// finished!
 }
