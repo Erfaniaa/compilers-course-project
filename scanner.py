@@ -72,7 +72,7 @@ TRANSITIONS = [
 	Transition('comment_end_star', 'comment', r'[^\*\/]'),
 	Transition('comment_end_star', 'comment_end_star', r'\*'),
 	Transition('comment_end_star', 'comment_end', r'\/'),
-	]
+]
 FINAL_STATES = {
 	'parentheses': TokenType.special_token,
 	'plus': TokenType.special_token,
@@ -101,7 +101,7 @@ FINAL_STATES = {
 }
 
 class Scanner:
-	def __init__(self, text="", initial_state=None, final_states={}, transitions=[], keywords=[]):
+	def __init__(self, text="", initial_state="", final_states={}, transitions=[], keywords=[]):
 		self.text = text
 		self.current_char_idx = 0
 		self.transitions = {}
