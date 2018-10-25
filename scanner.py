@@ -45,7 +45,7 @@ TRANSITIONS = [
 	Transition('new_token', 'less', r'\<'),
 	Transition('less', 'less_equal', r'\='),
 	Transition('new_token', 'not', r'\!'),
-	Transition('not', 'not_equal', r'\='),	
+	Transition('not', 'not_equal', r'\='),
 	Transition('new_token', 'semicolon', r'\;'),
 	Transition('new_token', 'string', r'\"'),
 	Transition('string', 'string_special_char', r'\\'),
@@ -91,7 +91,6 @@ FINAL_STATES = {
 	'comment_end': TokenType.comment,
 	'not': TokenType.special_token,
 	'not_equal': TokenType.special_token,
-	'equal': TokenType.special_token,
 	'equal_equal': TokenType.special_token,
 	'greater': TokenType.special_token,
 	'greater_equal': TokenType.special_token,
@@ -118,7 +117,7 @@ class Scanner:
 		return s in self.keywords
 	def _add_transition(self, transition):
 		if not self.transitions.get(transition.src):
-			self.transitions[transition.src] = []	
+			self.transitions[transition.src] = []
 		self.transitions[transition.src].append(transition)
 	def _add_transitions(self, transitions_list):
 		for transition in transitions_list:
@@ -155,7 +154,6 @@ class Scanner:
 			if token and len(token.value) > 0:
 				ret.append(token)
 		return ret
-
 
 text = open(sys.argv[-1], 'r').read()
 scanner = Scanner(text, 'new_token', FINAL_STATES, TRANSITIONS, KEYWORDS)
