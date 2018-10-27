@@ -109,8 +109,8 @@ FINAL_STATES = {
 
 
 class Scanner:
-	def __init__(self, texts="", initial_state="", final_states={}, transitions=[], keywords=[]):
-		self.text = texts
+	def __init__(self, text="", initial_state="", final_states={}, transitions=[], keywords=[]):
+		self.text = text
 		self.current_char_idx = 0
 		self.transitions = {}
 		self._add_transitions(transitions)
