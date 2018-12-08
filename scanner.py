@@ -38,7 +38,7 @@ class Token:
 		return "(" + self.value + ", " + str(self.type) + ")"
 
 
-KEYWORDS = ['if', 'while', 'do', 'for', 'main', 'return', 'int', 'float', 'double', 'char', 'else']
+zKEYWORDS = ['if', 'while', 'do', 'for', 'main', 'return', 'int', 'float', 'double', 'char', 'else']
 TRANSITIONS = [
 	Transition('new_token', 'parentheses', r'[\(\)]'),
 	Transition('new_token', 'comma', r'\,'),

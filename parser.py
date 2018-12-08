@@ -1,4 +1,5 @@
 import sys
+import re
 
 text = open(sys.argv[-1], 'r')
 
@@ -7,7 +8,6 @@ class Parser:
 	# parseStack = Stack()
 	# semanticStack = Stack()
 	grammers = []
-	terminals_none_terminals = []
 	variables = []
 	tokens = []
 	RHST = []
@@ -15,10 +15,14 @@ class Parser:
 	follows = {}
 	predicts = {}
 	parseTable = []
+	nullables = []
 
 	@staticmethod
 	def is_variable(st):
-		if st== '->':
+		pattern = r'[^\.a-zA-z]'
+		if re.search(pattern, st):
+			return False
+		if st == '->':
 			return False
 		if st == st.upper() and '@' != st[0]:
 			return True
@@ -26,7 +30,7 @@ class Parser:
 
 	@staticmethod
 	def is_semantic_rule(st):
-		if st== '->':
+		if st == '->':
 			return False
 		if '@' == st[0]:
 			return True
@@ -34,7 +38,7 @@ class Parser:
 
 	@staticmethod
 	def is_terminal(st):
-		if st== '->':
+		if st == '->':
 			return False
 		if '@' == st.lower() and '@' == st[0]:
 			return True
@@ -64,11 +68,32 @@ class Parser:
 	def find_all_nullable(self):
 		return
 
-	def find_variables(self):
-		for t in self.terminals_none_terminals:
+	def find_variables(self, g):
+		for t in g:
 			if self.is_variable(t):
-				self.variables.append(t)
-		return
+				if t not in self.variables:
+					self.variables.append(t)
+
+	def make_grammers(self):
+		idx = 0
+		for gra in self.grammers:
+			idx += 1
+			g = gra.split(" ")
+			self.find_variables(g)
+			if len(g) < 3:
+				print("not enough word ing grammer " + str(idx))
+				return False
+
+			if not self.is_variable(g[0]) or g[1] != '->':
+				print("error in grammer " + str(idx))
+				return False
+			if len(g) == 3 and g[2] == "nill" and g[0] not in self.nullables:
+				self.nullables.append(g[0])
+				continue
+
+		print(self.nullables)
+		print(self.variables)
+		return True
 
 	def read_grammers(self, text):
 		while True:
@@ -76,23 +101,11 @@ class Parser:
 			if "" == a:
 				break
 			else:
-				print(a.strip())
 				self.grammers.append(a.strip())
-		print(self.grammers)
-		for gra in self.grammers:
-			g = gra.split(" ")
-			for g1 in g:
-				self.terminals_none_terminals.append(g1)
-
-			print(g)
-		print(self.terminals_none_terminals)
-		self.find_variables()
-		print(self.variables)
-		return
+		self.make_grammers()
 
 	def run(self, text):
 		self.read_grammers(text)
-		return
 
 
 parser = Parser()
