@@ -13,7 +13,11 @@ class Set:
 			self.data.append(item)
 
 	def __getitem__(self, index):
-		return self.dlata[index]
+		return self.data[index]
+
+	def push_all(self, items):
+		for x in items:
+			self.push(x)
 
 
 class Parser:
@@ -23,9 +27,7 @@ class Parser:
 	rules = {}
 	grammers2 = {}
 	firsts = {}
-	variables = []
-	tokens = []
-	RHST = []
+	variables = Set()
 	follows = {}
 	predicts = {}
 	parseTable = []
@@ -190,8 +192,7 @@ class Parser:
 	def find_variables(self, g):
 		for t in g:
 			if self.is_variable(t):
-				if t not in self.variables:
-					self.variables.append(t)
+				self.variables.push(t)
 
 	def make_grammers(self, lines):
 		idx = 0
