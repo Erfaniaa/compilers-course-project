@@ -1,6 +1,6 @@
-from enum import Enum
 import re
 import sys
+from enum import Enum
 
 
 class Transition:
@@ -38,7 +38,7 @@ class Token:
 		return "(" + self.value + ", " + str(self.type) + ")"
 
 
-zKEYWORDS = ['if', 'while', 'do', 'for', 'main', 'return', 'int', 'float', 'double', 'char', 'else']
+KEYWORDS = ['if', 'while', 'do', 'for', 'main', 'return', 'int', 'float', 'double', 'char', 'else']
 TRANSITIONS = [
 	Transition('new_token', 'parentheses', r'[\(\)]'),
 	Transition('new_token', 'comma', r'\,'),
