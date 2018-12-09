@@ -34,8 +34,6 @@ class Set:
 
 
 class Parser:
-	# parseStack = Stack()
-	# semanticStack = Stack()
 	grammers = {}
 	rules = {}
 	grammers2 = {}
@@ -150,7 +148,6 @@ class Parser:
 				break
 
 	def find_all_firsts(self):
-		print(self.grammers)
 		for var in self.variables:
 			self.firsts[var] = Set()
 		while True:
@@ -243,6 +240,7 @@ class Parser:
 		self.find_all_firsts()
 		self.find_all_follows()
 		self.find_all_predicts()
+
 
 parser = Parser()
 parser.run(text)
