@@ -7,7 +7,8 @@ text = open(sys.argv[-1], 'r')
 class Parser:
 	# parseStack = Stack()
 	# semanticStack = Stack()
-	grammers = []
+	grammers = {}
+	grammers2 = {}
 	variables = []
 	tokens = []
 	RHST = []
@@ -74,9 +75,9 @@ class Parser:
 				if t not in self.variables:
 					self.variables.append(t)
 
-	def make_grammers(self):
+	def make_grammers(self, lines):
 		idx = 0
-		for gra in self.grammers:
+		for gra in lines:
 			idx += 1
 			g = gra.split(" ")
 			self.find_variables(g)
@@ -89,20 +90,28 @@ class Parser:
 				return False
 			if len(g) == 3 and g[2] == "nill" and g[0] not in self.nullables:
 				self.nullables.append(g[0])
-				continue
-
-		print(self.nullables)
-		print(self.variables)
+			del g[1]
+			key = g[0]
+			del g[0]
+			temp = []
+			if key in self.grammers:
+				temp = self.grammers[key]
+			temp.append(g)
+			if key not in self.grammers2:
+				self.grammers2[key] = {}
+			self.grammers2[key][idx] = g
+			self.grammers[key] = temp
 		return True
 
 	def read_grammers(self, text):
+		lines = []
 		while True:
 			a = text.readline()
 			if "" == a:
 				break
 			else:
-				self.grammers.append(a.strip())
-		self.make_grammers()
+				lines.append(a.strip())
+		self.make_grammers(lines)
 
 	def run(self, text):
 		self.read_grammers(text)

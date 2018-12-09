@@ -1,5 +1,4 @@
 C -> A
 C -> x
-# -> x
 A -> nill
 A -> b
