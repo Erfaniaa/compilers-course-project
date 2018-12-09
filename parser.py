@@ -84,11 +84,10 @@ class Parser:
 					is_right_null_able = False
 					break
 				if self.is_variable(right):
-					for x in self.firsts[right]:
-						pre.push(x)
-						if not self.is_null_able(right):
-							is_right_null_able = False
-							break
+					pre.push_all(self.firsts[right])
+					if not self.is_null_able(right):
+						is_right_null_able = False
+						break
 			if is_right_null_able:
 				pre.push_all(self.follows[self.rules[rule_id][0]])
 			self.predicts[rule_id] = pre
