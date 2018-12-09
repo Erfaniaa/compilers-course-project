@@ -23,6 +23,12 @@ class Set:
 			update = update or self.push(x)
 		return update
 
+	def __len__(self):
+		return len(self.data)
+
+	def __str__(self):
+		return str(self.data)
+
 
 class Parser:
 	# parseStack = Stack()
@@ -36,6 +42,16 @@ class Parser:
 	predicts = {}
 	parseTable = []
 	nullables = Set()
+
+	@staticmethod
+	def log_array_of_set(data):
+		for key in data:
+			print(key)
+			print("->")
+			output = ""
+			for andis in range(0, len(data[key])):
+				output += str(data[key][andis] + " ")
+			print(output)
 
 	@staticmethod
 	def is_variable(st):
@@ -129,22 +145,27 @@ class Parser:
 				break
 
 	def find_all_firsts(self):
+		print(self.grammers)
 		for var in self.variables:
 			self.firsts[var] = Set()
 		while True:
 			update = False
 			for var in self.variables:
+				print(var)
 				for gra in self.grammers[var]:
-					for right in gra:
-						t = self.firsts[var]
-						if self.is_terminal(right) and right != "nill":
-							update = update or t.push(right)
-						if self.is_variable(right):
-							update = update or t.push_all(self.firsts[right])
-						self.firsts[var] = t
-						if self.is_variable(right) and self.is_null_able(right):
-							continue
-						break
+					print(gra)
+
+			# 	print(gra)
+			# 	for right in gra:
+			# 		t = self.firsts[var]
+			# 		if self.is_terminal(right) and right != "nill":
+			# 			update = update or t.push(right)
+			# 		if self.is_variable(right):
+			# 			update = update or t.push_all(self.firsts[right])
+			# 		self.firsts[var] = t
+			# 		if self.is_variable(right) and self.is_null_able(right):
+			# 			continue
+			# 		break
 			if not update:
 				break
 
@@ -219,7 +240,11 @@ class Parser:
 		self.read_grammers(text)
 		self.find_all_nullable()
 		self.find_all_firsts()
-		self.find_all_follows()
+		print(self.firsts)
+
+
+# self.find_all_follows()
+# print(self.follows)
 
 
 parser = Parser()
