@@ -39,6 +39,7 @@ class Parser:
 	grammers2 = {}
 	firsts = {}
 	variables = Set()
+	terminals = Set()
 	follows = {}
 	predicts = {}
 	parseTable = []
@@ -196,12 +197,18 @@ class Parser:
 			if self.is_variable(t):
 				self.variables.push(t)
 
+	def find_terminals(self, g):
+		for t in g:
+			if self.is_terminal(t):
+				self.terminals.push(t)
+
 	def make_grammers(self, lines):
 		idx = 0
 		for gra in lines:
 			idx += 1
 			g = gra.split(" ")
 			self.find_variables(g)
+			self.find_terminals(g)
 			if len(g) < 3:
 				print("not enough word ing grammer " + str(idx))
 				return False
