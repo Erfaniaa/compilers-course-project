@@ -9,10 +9,10 @@ class Parser:
 	# semanticStack = Stack()
 	grammers = {}
 	grammers2 = {}
+	firsts = {}
 	variables = []
 	tokens = []
 	RHST = []
-	firsts = {}
 	follows = {}
 	predicts = {}
 	parseTable = []
@@ -41,7 +41,7 @@ class Parser:
 	def is_terminal(st):
 		if st == '->':
 			return False
-		if '@' == st.lower() and '@' == st[0]:
+		if st == st.lower() and '@' != st[0]:
 			return True
 		return False
 
@@ -67,6 +67,27 @@ class Parser:
 		return
 
 	def find_all_nullable(self):
+		while True:
+			update = False
+			for var in self.variables:
+				if var in self.nullables:
+					continue
+				for gra in self.grammers[var]:
+					all_nullables = True
+					for right in gra:
+						if self.is_terminal(right):
+							all_nullables = False
+						elif self.is_variable(right) and right not in self.nullables:
+							all_nullables = False
+						if not all_nullables:
+							break
+					if not all_nullables:
+						continue
+					elif var not in self.nullables:
+						self.nullables.append(var)
+						update = True
+			if not update:
+				break
 		return
 
 	def find_variables(self, g):
@@ -84,14 +105,13 @@ class Parser:
 			if len(g) < 3:
 				print("not enough word ing grammer " + str(idx))
 				return False
-
 			if not self.is_variable(g[0]) or g[1] != '->':
 				print("error in grammer " + str(idx))
 				return False
 			if len(g) == 3 and g[2] == "nill" and g[0] not in self.nullables:
 				self.nullables.append(g[0])
-			del g[1]
 			key = g[0]
+			del g[1]
 			del g[0]
 			temp = []
 			if key in self.grammers:
@@ -115,6 +135,8 @@ class Parser:
 
 	def run(self, text):
 		self.read_grammers(text)
+		self.find_all_nullable()
+
 
 
 parser = Parser()

@@ -2,3 +2,7 @@ C -> A
 C -> x
 A -> nill
 A -> b
+D -> A C
+X -> Y
+Y -> X
+X -> D
