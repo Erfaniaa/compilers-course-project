@@ -5,6 +5,17 @@ import copy as copy
 text = open(sys.argv[-1], 'r')
 
 
+class Set:
+	data = []
+
+	def push(self, item):
+		if item not in self.data:
+			self.data.append(item)
+
+	def __getitem__(self, index):
+		return self.dlata[index]
+
+
 class Parser:
 	# parseStack = Stack()
 	# semanticStack = Stack()
@@ -54,9 +65,34 @@ class Parser:
 		return
 
 	def find_all_predicts(self):
-		return
+		for rule_id in self.rules:
+			self.predicts[rule_id] = []
+		for rule_id in self.rules:
+			pre = []
+			idx = 0
+			is_right_null_able = True
+			for right in self.rules[rule_id]:
+				idx += 1
+				if idx == 1:
+					continue
+				if self.is_terminal(right):
+					if right not in pre:
+						pre.append(right)
+					is_right_null_able = False
+					break
+				if self.is_variable(right):
+					for x in self.firsts[right]:
+						if x not in pre:
+							pre.append(x)
+						if not self.is_null_able(right):
+							is_right_null_able = False
+							break
+			if is_right_null_able:
+				for x in self.follows[self.rules[rule_id][0]]:
+					if x not in pre:
+						pre.append(x)
+			self.predicts[rule_id] = pre
 
-	def follow(self):
 		return
 
 	def is_null_able(self, var):
