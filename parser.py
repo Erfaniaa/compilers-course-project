@@ -1,12 +1,15 @@
-import sys
-import re
 import copy as copy
+import re
+import sys
 
 text = open(sys.argv[-1], 'r')
 
 
 class Set:
-	data = []
+	def __init__(self):
+		self.data = []
+
+		return
 
 	def push(self, item):
 		if item not in self.data:
@@ -45,13 +48,15 @@ class Parser:
 
 	@staticmethod
 	def log_array_of_set(data):
+		print("+++++++++++")
 		for key in data:
-			print(key)
-			print("->")
+			print(key, end=' '),
+			print(" -> ", end=''),
 			output = ""
 			for andis in range(0, len(data[key])):
 				output += str(data[key][andis] + " ")
 			print(output)
+		print("----------")
 
 	@staticmethod
 	def is_variable(st):
@@ -151,21 +156,17 @@ class Parser:
 		while True:
 			update = False
 			for var in self.variables:
-				print(var)
 				for gra in self.grammers[var]:
-					print(gra)
-
-			# 	print(gra)
-			# 	for right in gra:
-			# 		t = self.firsts[var]
-			# 		if self.is_terminal(right) and right != "nill":
-			# 			update = update or t.push(right)
-			# 		if self.is_variable(right):
-			# 			update = update or t.push_all(self.firsts[right])
-			# 		self.firsts[var] = t
-			# 		if self.is_variable(right) and self.is_null_able(right):
-			# 			continue
-			# 		break
+					for right in gra:
+						t = self.firsts[var]
+						if self.is_terminal(right) and right != "nill":
+							update = update or t.push(right)
+						if self.is_variable(right):
+							update = update or t.push_all(self.firsts[right])
+						self.firsts[var] = t
+						if self.is_variable(right) and self.is_null_able(right):
+							continue
+						break
 			if not update:
 				break
 
@@ -240,10 +241,16 @@ class Parser:
 		self.read_grammers(text)
 		self.find_all_nullable()
 		self.find_all_firsts()
-		print(self.firsts)
+		self.find_all_follows()
+		self.find_all_predicts()
+		self.log_array_of_set(self.predicts)
 
 
-# self.find_all_follows()
+# x = Set()
+# x.push("book")
+# print(x)
+
+
 # print(self.follows)
 
 
