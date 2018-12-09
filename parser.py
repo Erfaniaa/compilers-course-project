@@ -20,6 +20,9 @@ class Set:
 	def __getitem__(self, index):
 		return self.data[index]
 
+	def __contains__(self, item):
+		return item in self.data
+
 	def push_all(self, items):
 		update = False
 		for x in items:
@@ -42,7 +45,7 @@ class Parser:
 	terminals = Set()
 	follows = {}
 	predicts = {}
-	parseTable = []
+	parseTable = {}
 	nullables = Set()
 
 	@staticmethod
@@ -88,7 +91,20 @@ class Parser:
 		return
 
 	def fill_parse_table(self):
-		return
+		for var in self.variables:
+			self.parseTable[var] = {}
+			for ter in self.terminals:
+				self.parseTable[var][ter] = 0
+		for rule_id in self.rules:
+			var = self.rules[rule_id][0]
+			for ter in self.terminals:
+				if ter in self.predicts[rule_id]:
+					if self.parseTable[var][ter] != 0:
+						print("your grammer is not LL1")
+						return False
+					else:
+						self.parseTable[var][ter] = rule_id
+		return True
 
 	def find_all_predicts(self):
 		for rule_id in self.rules:
@@ -239,15 +255,20 @@ class Parser:
 				break
 			else:
 				lines.append(a.strip())
-		self.make_grammers(lines)
+		return self.make_grammers(lines)
 
 	def run(self, text):
-		self.read_grammers(text)
+		if not self.read_grammers(text):
+			return
 		self.find_all_nullable()
 		self.find_all_firsts()
 		self.find_all_follows()
 		self.find_all_predicts()
+		if not self.fill_parse_table():
+			return
 
+		# print(self.rules)
+		print("your grammer is LL1")
 
 parser = Parser()
 parser.run(text)
