@@ -57,14 +57,38 @@ class Parser:
 	def follow(self):
 		return
 
+	def is_null_able(self, var):
+		return var in self.nullables
+
 	def find_all_follows(self):
 		return
 
-	def first(self):
-		return
+	first_state = {}
 
 	def find_all_firsts(self):
-		return
+		for var in self.variables:
+			self.firsts[var] = []
+		while True:
+			update = False
+			for var in self.variables:
+				for gra in self.grammers[var]:
+					for right in gra:
+						t = self.firsts[var]
+						if self.is_terminal(right) and right != "nill":
+							if right not in t:
+								t.append(right)
+								update = True
+						if self.is_variable(right):
+							for fi in self.firsts[right]:
+								if fi not in t:
+									t.append(fi)
+									update = True
+						self.firsts[var] = t
+						if self.is_variable(right) and self.is_null_able(right):
+							continue
+						break
+			if not update:
+				break
 
 	def find_all_nullable(self):
 		while True:
@@ -136,7 +160,7 @@ class Parser:
 	def run(self, text):
 		self.read_grammers(text)
 		self.find_all_nullable()
-
+		self.find_all_firsts()
 
 
 parser = Parser()

@@ -1,8 +1,7 @@
 C -> A
-C -> x
+C -> a
 A -> nill
 A -> b
 D -> A C
 X -> Y
-Y -> X
-X -> D
+Y -> b
