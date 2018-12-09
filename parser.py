@@ -11,6 +11,8 @@ class Set:
 	def push(self, item):
 		if item not in self.data:
 			self.data.append(item)
+			return True
+		return False
 
 	def __getitem__(self, index):
 		return self.data[index]
@@ -31,7 +33,7 @@ class Parser:
 	follows = {}
 	predicts = {}
 	parseTable = []
-	nullables = []
+	nullables = Set()
 
 	@staticmethod
 	def is_variable(st):
@@ -183,7 +185,7 @@ class Parser:
 					if not all_nullables:
 						continue
 					elif var not in self.nullables:
-						self.nullables.append(var)
+						self.nullables.push(var)
 						update = True
 			if not update:
 				break
@@ -206,8 +208,8 @@ class Parser:
 			if not self.is_variable(g[0]) or g[1] != '->':
 				print("error in grammer " + str(idx))
 				return False
-			if len(g) == 3 and g[2] == "nill" and g[0] not in self.nullables:
-				self.nullables.append(g[0])
+			if len(g) == 3 and g[2] == "nill":
+				self.nullables.push(g[0])
 			key = g[0]
 			del g[1]
 			self.rules[idx] = copy.deepcopy(g)
