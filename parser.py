@@ -18,8 +18,10 @@ class Set:
 		return self.data[index]
 
 	def push_all(self, items):
+		update = False
 		for x in items:
-			self.push(x)
+			update = update or self.push(x)
+		return update
 
 
 class Parser:
@@ -70,9 +72,7 @@ class Parser:
 
 	def find_all_predicts(self):
 		for rule_id in self.rules:
-			self.predicts[rule_id] = []
-		for rule_id in self.rules:
-			pre = []
+			pre = Set()
 			idx = 0
 			is_right_null_able = True
 			for right in self.rules[rule_id]:
@@ -80,23 +80,18 @@ class Parser:
 				if idx == 1:
 					continue
 				if self.is_terminal(right):
-					if right not in pre:
-						pre.append(right)
+					pre.push(right)
 					is_right_null_able = False
 					break
 				if self.is_variable(right):
 					for x in self.firsts[right]:
-						if x not in pre:
-							pre.append(x)
+						pre.push(x)
 						if not self.is_null_able(right):
 							is_right_null_able = False
 							break
 			if is_right_null_able:
-				for x in self.follows[self.rules[rule_id][0]]:
-					if x not in pre:
-						pre.append(x)
+				pre.push_all(self.follows[self.rules[rule_id][0]])
 			self.predicts[rule_id] = pre
-
 		return
 
 	def is_null_able(self, var):
@@ -104,7 +99,7 @@ class Parser:
 
 	def find_all_follows(self):
 		for var in self.variables:
-			self.follows[var] = []
+			self.follows[var] = Set()
 		while True:
 			update = False
 			for var in self.variables:
@@ -119,32 +114,24 @@ class Parser:
 							continue
 						if next_one_first_should_be_in_var_follows:
 							if self.is_variable(x):
-								for fi_x in self.firsts[x]:
-									if fi_x not in fol:
-										fol.append(fi_x)
-										update = True
+								update = update or fol.push_all(self.firsts[x])
 								if not self.is_null_able(x):
 									next_one_first_should_be_in_var_follows = False
 							if self.is_terminal(x):
 								next_one_first_should_be_in_var_follows = False
-								if x not in fol:
-									fol.append(x)
-									update = True
+								update = update or fol.push(x)
 						if not next_one_first_should_be_in_var_follows:
 							if x == var:
 								next_one_first_should_be_in_var_follows = True
 							continue
 					if next_one_first_should_be_in_var_follows:
-						for x in self.follows[rule[0]]:
-							if x not in fol:
-								fol.append(x)
-								update = True
+						update = update or fol.push_all(self.follows[rule[0]])
 			if not update:
 				break
 
 	def find_all_firsts(self):
 		for var in self.variables:
-			self.firsts[var] = []
+			self.firsts[var] = Set()
 		while True:
 			update = False
 			for var in self.variables:
@@ -152,14 +139,9 @@ class Parser:
 					for right in gra:
 						t = self.firsts[var]
 						if self.is_terminal(right) and right != "nill":
-							if right not in t:
-								t.append(right)
-								update = True
+							update = update or t.push(right)
 						if self.is_variable(right):
-							for fi in self.firsts[right]:
-								if fi not in t:
-									t.append(fi)
-									update = True
+							update = update or t.push_all(self.firsts[right])
 						self.firsts[var] = t
 						if self.is_variable(right) and self.is_null_able(right):
 							continue
@@ -243,5 +225,3 @@ class Parser:
 
 parser = Parser()
 parser.run(text)
-
-# print(text)
