@@ -4,4 +4,5 @@ A -> nill
 A -> b
 D -> A C
 X -> Y
-Y -> b
+Y -> X
+X -> p

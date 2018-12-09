@@ -1,5 +1,6 @@
 import sys
 import re
+import copy as copy
 
 text = open(sys.argv[-1], 'r')
 
@@ -8,6 +9,7 @@ class Parser:
 	# parseStack = Stack()
 	# semanticStack = Stack()
 	grammers = {}
+	rules = {}
 	grammers2 = {}
 	firsts = {}
 	variables = []
@@ -61,7 +63,46 @@ class Parser:
 		return var in self.nullables
 
 	def find_all_follows(self):
-		return
+		for var in self.variables:
+			self.follows[var] = []
+		while True:
+			update = False
+			for var in self.variables:
+				fol = self.follows[var]
+				for rule_id in self.rules:
+					rule = self.rules[rule_id]
+					next_one_first_should_be_in_var_follows = False
+					idx = 0
+					for x in rule:
+						idx += 1
+						if idx == 1:
+							continue
+						if next_one_first_should_be_in_var_follows:
+							if self.is_variable(x):
+								for fi_x in self.firsts[x]:
+									if fi_x not in fol:
+										fol.append(fi_x)
+										update = True
+								if not self.is_null_able(x):
+									next_one_first_should_be_in_var_follows = False
+							if self.is_terminal(x):
+								next_one_first_should_be_in_var_follows = False
+								if x not in fol:
+									fol.append(x)
+									update = True
+						if not next_one_first_should_be_in_var_follows:
+							if x == var:
+								next_one_first_should_be_in_var_follows = True
+							continue
+					if next_one_first_should_be_in_var_follows:
+						for x in rule[0]:
+							if x not in fol:
+								fol.append(x)
+								update = True
+			if not update:
+				break
+		for x in self.follows:
+			print(str(x) + " = " + str(self.follows[x]))
 
 	first_state = {}
 
@@ -136,6 +177,7 @@ class Parser:
 				self.nullables.append(g[0])
 			key = g[0]
 			del g[1]
+			self.rules[idx] = copy.deepcopy(g)
 			del g[0]
 			temp = []
 			if key in self.grammers:
@@ -161,6 +203,7 @@ class Parser:
 		self.read_grammers(text)
 		self.find_all_nullable()
 		self.find_all_firsts()
+		self.find_all_follows()
 
 
 parser = Parser()
