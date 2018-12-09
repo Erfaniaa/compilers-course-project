@@ -9,8 +9,6 @@ class Set:
 	def __init__(self):
 		self.data = []
 
-		return
-
 	def push(self, item):
 		if item not in self.data:
 			self.data.append(item)
@@ -101,6 +99,7 @@ class Parser:
 				if ter in self.predicts[rule_id]:
 					if self.parseTable[var][ter] != 0:
 						print("your grammer is not LL1")
+						print(str(var) + "--" + str(ter))
 						return False
 					else:
 						self.parseTable[var][ter] = rule_id
@@ -266,9 +265,8 @@ class Parser:
 		self.find_all_predicts()
 		if not self.fill_parse_table():
 			return
-
-		# print(self.rules)
 		print("your grammer is LL1")
+
 
 parser = Parser()
 parser.run(text)
