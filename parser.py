@@ -95,7 +95,7 @@ class Parser:
 								next_one_first_should_be_in_var_follows = True
 							continue
 					if next_one_first_should_be_in_var_follows:
-						for x in rule[0]:
+						for x in self.follows[rule[0]]:
 							if x not in fol:
 								fol.append(x)
 								update = True

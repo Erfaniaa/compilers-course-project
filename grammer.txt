@@ -2,7 +2,4 @@ C -> A
 C -> a
 A -> nill
 A -> b
-D -> A C
-X -> Y
-Y -> X
-X -> p
+D -> A C A d
