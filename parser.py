@@ -101,10 +101,6 @@ class Parser:
 								update = True
 			if not update:
 				break
-		for x in self.follows:
-			print(str(x) + " = " + str(self.follows[x]))
-
-	first_state = {}
 
 	def find_all_firsts(self):
 		for var in self.variables:
