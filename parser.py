@@ -243,16 +243,6 @@ class Parser:
 		self.find_all_firsts()
 		self.find_all_follows()
 		self.find_all_predicts()
-		self.log_array_of_set(self.predicts)
-
-
-# x = Set()
-# x.push("book")
-# print(x)
-
-
-# print(self.follows)
-
 
 parser = Parser()
 parser.run(text)
