@@ -1,4 +1,4 @@
-S -> X d
+S -> X d Y
 S -> a
 X -> b
 Y -> X

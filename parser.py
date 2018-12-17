@@ -9,6 +9,7 @@ class Parser:
 	_NIL_STRING = "nil"
 	_INVALID = -1
 	_SEMANTIC_RULE_CHARACTER = '@'
+	_END_OF_FILE_CHARACTER = '$'
 
 
 	@staticmethod
@@ -42,15 +43,18 @@ class Parser:
 	def is_terminal(s):
 		if len(s) == 0:
 			return False
+		if s == Parser._NIL_STRING:
+			return False
 		if s == Parser._ARROW_STRING:
 			return False
 		if s == s.lower() and s[0] != Parser._SEMANTIC_RULE_CHARACTER:
 			return True
 		return False
-	
 
-	def __init__(self):
+
+	def __init__(self, start_variable):
 		self.clear()
+		self.set_start_variable(start_variable)
 
 
 	def clear(self):
@@ -66,12 +70,39 @@ class Parser:
 		self._parse_table = {}
 
 
+	def set_start_variable(self, start_variable):
+		self._start_variable = start_variable
+
+
 	def _is_nullable_variable(self, variable):
 		return variable in self._nullable_variables
 
 
 	def _parse_code(self):
 		return
+
+	def match(self, seq):
+		seq.append(self._END_OF_FILE_CHARACTER)
+		idx = 0
+		parse_stack = [self._END_OF_FILE_CHARACTER, self._start_variable]
+		top = self._start_variable
+		while top != self._END_OF_FILE_CHARACTER:
+			if top == seq[idx]:
+				idx = idx + 1
+				parse_stack.pop()
+			elif (self.is_terminal(top)):
+				return False
+			else:
+				try:
+					product_idx = self._parse_table[top][seq[idx]]
+					product = self._rules[product_idx][1:]
+					parse_stack.pop()
+					if product != [self._NIL_STRING]:
+						parse_stack.extend(reversed(product))
+				except KeyError:
+					return (False, "Error: Not able to find derivation of {0} on `{1}`".format(top, seq[idx]))
+			top = parse_stack[-1]
+		return (True, "Sequence matched successfully.")
 
 
 	def _fill_parse_table(self):
@@ -225,10 +256,10 @@ class Parser:
 		return (True, "Grammar updated successfully.")
 
 
-	def _make_grammar_from_text(self, text):
+	def _make_grammar_from_text(self, rules_text):
 		lines = []
 		while True:
-			line = text.readline().strip()
+			line = rules_text.readline().strip()
 			if not line or line == "":
 				break
 			else:
@@ -237,9 +268,9 @@ class Parser:
 		return (True, "Grammar made successfully.")
 
 
-	def run(self, text):
+	def run(self, rules_text):
 		self.clear()
-		if not self._make_grammar_from_text(text)[0]:
+		if not self._make_grammar_from_text(rules_text)[0]:
 			return (False, "Error in making grammar")
 		self._find_all_nullable_variables()
 		self._find_all_firsts()
@@ -248,6 +279,10 @@ class Parser:
 		if not self._fill_parse_table()[0]:
 			return (False, "Error in filling parse table")
 		return (True, "Parser ran successfully.")
+
+
+	def get_start(self):
+		return self._start
 
 
 	def get_firsts(self):
@@ -286,14 +321,15 @@ class Parser:
 		return self._nullable_variables
 
 
-parser = Parser()
+parser = Parser("S")
 text = open(sys.argv[-1], 'r')
-parser.run(text)
+if parser.run(text):
+	print(parser.get_firsts())
+	print(parser.get_follows())
+	print(parser.get_variables())
+	print(parser.get_parse_table())
+	print(parser.get_rules())
+	print(parser.get_variable_rules())
+	print(parser.get_variable_rules_with_id())
 
-print(parser.get_firsts())
-print(parser.get_follows())
-print(parser.get_variables())
-print(parser.get_parse_table())
-print(parser.get_rules())
-print(parser.get_variable_rules())
-print(parser.get_variable_rules_with_id())
+	print(parser.match(["b", "d", "b"]))
