@@ -169,9 +169,3 @@ class Scanner:
 			if token and len(token.value) > 0:
 				ret.append(token)
 		return ret
-
-
-# text = open(sys.argv[-1], 'r').read()
-# scanner = Scanner(text, 'new_token', FINAL_STATES, TRANSITIONS, KEYWORDS)
-# scanner_result = scanner.run()
-# print(scanner_result)

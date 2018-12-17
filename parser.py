@@ -107,6 +107,10 @@ class Parser:
 					return (False, "Error")
 			try:
 				nxt = tokens[idx].value
+				if tokens[idx].type == TokenType.identifier:
+					nxt = self._IDENTIFIER_STRING
+				if tokens[idx].type == TokenType.number:
+					nxt = self._NUMBER_STRING
 				rule_idx = self._parse_table[top][nxt]
 				product = self._rules[rule_idx][1:]
 				parse_stack.pop()
@@ -314,16 +318,3 @@ class Parser:
 
 	def get_nullable_variables(self):
 		return self._nullable_variables
-
-
-# parser = Parser("S")
-# text = open(sys.argv[-1], 'r')
-# if parser.run(text):
-# 	print(parser.get_firsts())
-# 	print(parser.get_follows())
-# 	print(parser.get_variables())
-# 	print(parser.get_parse_table())
-# 	print(parser.get_rules())
-# 	print(parser.get_variable_rules())
-# 	print(parser.match([Token("while", TokenType.keyword), Token("(", TokenType.special_token), Token(")", TokenType.special_token)]))
-# 	print(parser.match([Token("a", TokenType.identifier), Token("+", TokenType.special_token), Token("b", TokenType.identifier)]))
