@@ -1,6 +1,6 @@
+from enum import Enum
 import re
 import sys
-from enum import Enum
 
 
 class Transition:
@@ -139,8 +139,8 @@ class Scanner:
 	def _next_token(self):
 		self.state = self.initial_state
 		ret = ""
-		while self.current_char_idx < len(text):
-			current_char = text[self.current_char_idx]
+		while self.current_char_idx < len(self.text):
+			current_char = self.text[self.current_char_idx]
 			if not self.transitions.get(self.state):
 				break
 			found = False
@@ -164,14 +164,14 @@ class Scanner:
 
 	def run(self):
 		ret = []
-		while self.current_char_idx < len(text):
+		while self.current_char_idx < len(self.text):
 			token = self._next_token()
 			if token and len(token.value) > 0:
 				ret.append(token)
 		return ret
 
 
-text = open(sys.argv[-1], 'r').read()
-scanner = Scanner(text, 'new_token', FINAL_STATES, TRANSITIONS, KEYWORDS)
-scanner_result = scanner.run()
-print(scanner_result)
+# text = open(sys.argv[-1], 'r').read()
+# scanner = Scanner(text, 'new_token', FINAL_STATES, TRANSITIONS, KEYWORDS)
+# scanner_result = scanner.run()
+# print(scanner_result)

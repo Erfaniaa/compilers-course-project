@@ -1,7 +1,1 @@
-S -> X d Y
-S -> a
-X -> b
-Y -> X
-Y -> Y Y
-Y -> nil
-A -> nil
+MATH_EXPRESSION -> TERM MATH_EXPRESSION
