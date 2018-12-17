@@ -1,0 +1,7 @@
+S -> X d
+S -> a
+X -> b
+Y -> X
+Y -> Y Y
+Y -> nil
+A -> nil
