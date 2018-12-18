@@ -37,14 +37,19 @@ class Token:
 		return "(" + self.value + ", " + str(self.type) + ")"
 
 
-KEYWORDS = ['if', 'while', 'do', 'for', 'main', 'return', 'int', 'float', 'double', 'char', 'else']
+KEYWORDS = ['if', 'while', 'do', 'for', 'main', 'return', 'int', 'float', 'double', 'char', 'else', 'break', 'continue', 'and', 'or', 'not']
 TRANSITIONS = [
 	Transition('new_token', 'parentheses', r'[\(\)]'),
+	Transition('new_token', 'brackets', r'[\[\]]'),
+	Transition('new_token', 'braces', r'[{}]'),
+	Transition('new_token', 'star', r'\*'),
 	Transition('new_token', 'comma', r'\,'),
 	Transition('new_token', 'plus', r'\+'),
 	Transition('plus', 'plus_plus', r'\+'),
+	Transition('plus', 'plus_equal', r'\='),
 	Transition('new_token', 'minus', r'\-'),
 	Transition('minus', 'minus_minus', r'\-'),
+	Transition('minus', 'minus_equal', r'\='),
 	Transition('new_token', 'equal', r'\='),
 	Transition('equal', 'equal_equal', r'\='),
 	Transition('new_token', 'greater', r'\>'),
@@ -82,10 +87,14 @@ TRANSITIONS = [
 ]
 FINAL_STATES = {
 	'parentheses': TokenType.special_token,
+	'brackets': TokenType.special_token,
+	'braces': TokenType.special_token,
 	'plus': TokenType.special_token,
 	'plus_plus': TokenType.special_token,
+	'plus_equal': TokenType.special_token,
 	'minus': TokenType.special_token,
 	'minus_minus': TokenType.special_token,
+	'minus_equal': TokenType.special_token,
 	'equal': TokenType.special_token,
 	'semicolon': TokenType.special_token,
 	'identifier': TokenType.identifier,
@@ -104,6 +113,8 @@ FINAL_STATES = {
 	'less': TokenType.special_token,
 	'less_equal': TokenType.special_token,
 	'comma': TokenType.special_token,
+	'star': TokenType.special_token,
+	'division_or_comment': TokenType.special_token,
 }
 
 
@@ -165,12 +176,6 @@ class Scanner:
 		ret = []
 		while self.current_char_idx < len(self.text):
 			token = self._next_token()
-			if token and len(token.value) > 0:
+			if token and len(token.value) > 0 and token.type != TokenType.comment:
 				ret.append(token)
 		return ret
-
-
-# text = open(sys.argv[-1], 'r').read()
-# scanner = Scanner(text, 'new_token', FINAL_STATES, TRANSITIONS, KEYWORDS)
-# scanner_result = scanner.run()
-# print(scanner_result)

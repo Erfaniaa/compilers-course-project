@@ -1,17 +1,17 @@
 int main() {
-	/** this is a 
-
-	test
-
-	**/
-	int a = 10, b = 20;
-	if (a >= b) {
-		double c = 10;
+	int a, b, c;
+	b = a * 2 + 10;
+	while (1 + 5 < 2 * a - 8) {
+		c = d;
 	}
-	else {
-		float d = .123 + 40.56;
-		b--;
-		a ++ ;
+	for (int i = 0; i < n; i++) {
+		c = d;
+		if (a == 10) {
+			d = 40 * a + c;
+		}
+		else {
+			c = 40 * a - c;
+		}
 	}
-	// finished!
+	int arr[] = {1, 2, 3}, arr2[] = {2, 3}, l[5];
 }
