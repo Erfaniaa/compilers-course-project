@@ -1,7 +1,8 @@
 import sys
+
 from parser import Parser
-from scanner import Scanner
 from scanner import FINAL_STATES, TRANSITIONS, KEYWORDS
+from scanner import Scanner
 
 grammar_rules = open(sys.argv[-2], 'r')
 text = open(sys.argv[-1], 'r').read()

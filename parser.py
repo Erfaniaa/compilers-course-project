@@ -1,17 +1,13 @@
-from utils import add_element_to_set, add_list_of_elements_to_set
 import copy
 import re
 import sys
-from scanner import TokenType, Token
+
+from utils import add_element_to_set, add_list_of_elements_to_set
 
 
 class Parser:
 	_ARROW_STRING = "->"
-	_RULE_COMMENT_CHARACTER = '#'
 	_NIL_STRING = "nil"
-	_IDENTIFIER_STRING = "identifier"
-	_NUMBER_STRING = "number"
-	_STRING_STRING = "string"
 	_INVALID = -1
 	_SEMANTIC_RULE_CHARACTER = '@'
 	_END_OF_FILE_CHARACTER = '$'
@@ -22,7 +18,7 @@ class Parser:
 			return False
 		if s == Parser._NIL_STRING:
 			return False
-		pattern = r'[^\.a-zA-Z_0-9]'
+		pattern = r'[^\.a-zA-Z]'
 		if re.search(pattern, s):
 			return False
 		if s == Parser._ARROW_STRING:
@@ -62,6 +58,7 @@ class Parser:
 		self._nullable_variables = []
 		self._terminals = []
 		self._variable_rules = {}
+		self._variable_rules_with_id = {}
 		self._rules = []
 		self._firsts = {}
 		self._follows = {}
@@ -74,46 +71,29 @@ class Parser:
 	def _is_nullable_variable(self, variable):
 		return variable in self._nullable_variables
 
-	def match(self, tokens):
-		tokens.append(self._END_OF_FILE_CHARACTER)
+	def _parse_code(self):
+		return
+
+	def match(self, seq):
+		seq.append(self._END_OF_FILE_CHARACTER)
 		idx = 0
 		parse_stack = [self._END_OF_FILE_CHARACTER, self._start_variable]
 		top = self._start_variable
 		while top != self._END_OF_FILE_CHARACTER:
-			print("stack", parse_stack)
-			if top == self._IDENTIFIER_STRING:
-				if tokens[idx].type == TokenType.identifier:
-					idx = idx + 1
-					parse_stack.pop()
-					top = parse_stack[-1]
-					continue
-				else:
-					return (False, "Error")
-			elif top == self._NUMBER_STRING:
-				if tokens[idx].type == TokenType.number:
-					idx = idx + 1
-					parse_stack.pop()
-					top = parse_stack[-1]
-					continue
-				else:
-					return (False, "Error")
-			elif self.is_terminal(top):
-				if tokens[idx].value == top:
-					idx = idx + 1
-					parse_stack.pop()
-					top = parse_stack[-1]
-					continue
-				else:
-					return (False, "Error")
-			try:
-				nxt = tokens[idx].value
-				rule_idx = self._parse_table[top][nxt]
-				product = self._rules[rule_idx][1:]
+			if top == seq[idx]:
+				idx = idx + 1
 				parse_stack.pop()
-				if product != [self._NIL_STRING]:
-					parse_stack.extend(reversed(product))
-			except KeyError:
-				return (False, "Error: Unable to find derivation of '{0}' on '{1}'".format(top, nxt))
+			elif (self.is_terminal(top)):
+				return False
+			else:
+				try:
+					product_idx = self._parse_table[top][seq[idx]]
+					product = self._rules[product_idx][1:]
+					parse_stack.pop()
+					if product != [self._NIL_STRING]:
+						parse_stack.extend(reversed(product))
+				except KeyError:
+					return (False, "Error: Not able to find derivation of {0} on `{1}`".format(top, seq[idx]))
 			top = parse_stack[-1]
 		return (True, "Sequence matched successfully.")
 
@@ -127,8 +107,8 @@ class Parser:
 			for terminal in self._terminals:
 				if terminal in self._predicts[rule_id]:
 					if self._parse_table[variable][terminal] != Parser._INVALID:
-						print(False, "The grammar is not LL1. Variable: " + str(variable) + " Terminal: " + str(terminal))
-						return (False, "The grammar is not LL1. Variable: " + str(variable) + " Terminal: " + str(terminal))
+						return (
+						False, "The grammar is not LL1. Variable: " + str(variable) + " Terminal: " + str(terminal))
 					else:
 						self._parse_table[variable][terminal] = rule_id
 		return (True, "Parse table filled successfully.")
@@ -245,7 +225,8 @@ class Parser:
 			return (False, "Error in rule number " + str(idx))
 		if not self.is_variable(rule_text_tokens[0]) or rule_text_tokens[1] != Parser._ARROW_STRING:
 			return (False, "Error in rule number " + str(idx))
-		if len(rule_text_tokens) == 3 and rule_text_tokens[2] == Parser._NIL_STRING and rule_text_tokens[0] not in self._nullable_variables:
+		if len(rule_text_tokens) == 3 and rule_text_tokens[2] == Parser._NIL_STRING and rule_text_tokens[
+			0] not in self._nullable_variables:
 			self._nullable_variables.append(rule_text_tokens[0])
 		key = rule_text_tokens[0]
 		del rule_text_tokens[1]
@@ -255,22 +236,21 @@ class Parser:
 		if key in self._variable_rules:
 			temp_list = self._variable_rules[key]
 		temp_list.append(rule_text_tokens)
+		if key not in self._variable_rules_with_id:
+			self._variable_rules_with_id[key] = {}
+		self._variable_rules_with_id[key][idx] = rule_text_tokens
 		self._variable_rules[key] = temp_list
 		return (True, "Grammar updated successfully.")
 
 	def _make_grammar_from_text(self, rules_text):
 		lines = []
 		while True:
-			line = rules_text.readline()
-			if not line:
+			line = rules_text.readline().strip()
+			if not line or line == "":
 				break
-			line = line.strip()
-			if line == "":
-				continue
-			if line[0] == Parser._RULE_COMMENT_CHARACTER:
-				continue
-			if not self._update_grammar(line)[0]:
-				return (False, "Error in making grammar")
+			else:
+				if not self._update_grammar(line):
+					return (False, "Error in making grammar")
 		return (True, "Grammar made successfully.")
 
 	def run(self, rules_text):
@@ -294,9 +274,6 @@ class Parser:
 	def get_follows(self):
 		return self._follows
 
-	def get_predicts(self):
-		return self._predicts
-
 	def get_variables(self):
 		return self._variables
 
@@ -312,18 +289,22 @@ class Parser:
 	def get_variable_rules(self):
 		return self._variable_rules
 
+	def get_variable_rules_with_id(self):
+		return self._variable_rules_with_id
+
 	def get_nullable_variables(self):
 		return self._nullable_variables
 
 
-# parser = Parser("S")
-# text = open(sys.argv[-1], 'r')
-# if parser.run(text):
-# 	print(parser.get_firsts())
-# 	print(parser.get_follows())
-# 	print(parser.get_variables())
-# 	print(parser.get_parse_table())
-# 	print(parser.get_rules())
-# 	print(parser.get_variable_rules())
-# 	print(parser.match([Token("while", TokenType.keyword), Token("(", TokenType.special_token), Token(")", TokenType.special_token)]))
-# 	print(parser.match([Token("a", TokenType.identifier), Token("+", TokenType.special_token), Token("b", TokenType.identifier)]))
+parser = Parser("S")
+text = open(sys.argv[-1], 'r')
+if parser.run(text):
+	print(parser.get_firsts())
+	print(parser.get_follows())
+	print(parser.get_variables())
+	print(parser.get_parse_table())
+	print(parser.get_rules())
+	print(parser.get_variable_rules())
+	print(parser.get_variable_rules_with_id())
+
+	# print(parser.match(["b", "d", "b"]))
