@@ -80,7 +80,7 @@ class Parser:
 		parse_stack = [self._END_OF_FILE_CHARACTER, self._start_variable]
 		top = self._start_variable
 		while top != self._END_OF_FILE_CHARACTER:
-			print("stack", parse_stack)
+			print(parse_stack, tokens[idx])
 			if top == self._IDENTIFIER_STRING:
 				if tokens[idx].type == TokenType.identifier:
 					idx = idx + 1
