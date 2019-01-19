@@ -138,8 +138,10 @@ class Parser:
 			for terminal in self._terminals:
 				if terminal in self._predicts[rule_id]:
 					if self._parse_table[variable][terminal] != Parser._INVALID:
-						print(False, "The grammar is not LL1. Variable: " + str(variable) + " Terminal: " + str(terminal))
-						return (False, "The grammar is not LL1. Variable: " + str(variable) + " Terminal: " + str(terminal))
+						print(False,
+							  "The grammar is not LL1. Variable: " + str(variable) + " Terminal: " + str(terminal))
+						return (
+						False, "The grammar is not LL1. Variable: " + str(variable) + " Terminal: " + str(terminal))
 					else:
 						self._parse_table[variable][terminal] = rule_id
 		return (True, "Parse table filled successfully.")
@@ -256,7 +258,8 @@ class Parser:
 			return (False, "Error in rule number " + str(idx))
 		if not self.is_variable(rule_text_tokens[0]) or rule_text_tokens[1] != Parser._ARROW_STRING:
 			return (False, "Error in rule number " + str(idx))
-		if len(rule_text_tokens) == 3 and rule_text_tokens[2] == Parser._NIL_STRING and rule_text_tokens[0] not in self._nullable_variables:
+		if len(rule_text_tokens) == 3 and rule_text_tokens[2] == Parser._NIL_STRING and rule_text_tokens[
+			0] not in self._nullable_variables:
 			self._nullable_variables.append(rule_text_tokens[0])
 		key = rule_text_tokens[0]
 		del rule_text_tokens[1]
@@ -270,7 +273,6 @@ class Parser:
 		return (True, "Grammar updated successfully.")
 
 	def _make_grammar_from_text(self, rules_text):
-		lines = []
 		while True:
 			line = rules_text.readline()
 			if not line:
