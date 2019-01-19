@@ -10,7 +10,6 @@ class Symbol:
 		self.address = address  # address
 
 
-print("hello")
 
 
 class SymbolTable:
@@ -29,7 +28,8 @@ class SymbolTable:
 	def get_more_size(self):
 		for i in range(100000):
 			self.bitmap.append(0)
-			# print(i)
+
+	# print(i)
 
 	def make_full_bitmap(self, start, size):
 		for i in range(start, start + size):
@@ -86,10 +86,16 @@ class SymbolTable:
 		best_var_scope = - 1
 		best_symbol_address = -1
 		for symbol in self.symbols:
-			if symbol.var_name == var_name and symbol.function == self.function and self.scope > best_var_scope:
+			if symbol.var_name == var_name and symbol.function == self.function and symbol.scope > best_var_scope:
 				best_symbol_address = symbol.address
 		if best_symbol_address == -1:
 			for symbol in self.symbols:
 				if symbol.var_name == var_name and symbol.function == "Global":
 					best_symbol_address = symbol.address
 		return best_symbol_address
+
+	def is_var_declared(self, var_name):
+		for symbol in self.symbols:
+			if symbol.var_name == var_name and symbol.function == self.function and self.scope == symbol.scope:
+				return True
+		return False

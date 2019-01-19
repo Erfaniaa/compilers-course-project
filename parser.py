@@ -2,7 +2,9 @@ import copy
 import re
 
 from codeGenerator import CodeGenerator
+from codeGenerator import FinalCode
 from scanner import TokenType
+from symbolTable import SymbolTable
 from utils import add_element_to_set, add_list_of_elements_to_set
 
 
@@ -69,6 +71,8 @@ class Parser:
 		self._predicts = {}
 		self._parse_table = {}
 		self.parse_stack = []
+		self.final_code = FinalCode()
+		self.symbol_table = SymbolTable()
 
 	def set_start_variable(self, start_variable):
 		self._start_variable = start_variable
@@ -83,15 +87,20 @@ class Parser:
 		code_generator = CodeGenerator(self)
 		tokens.append(self._END_OF_FILE_CHARACTER)
 		idx = 0
-		self.parse_stack = [self._END_OF_FILE_CHARACTER, self._start_variable]
+		self.parse_stack.append(self._END_OF_FILE_CHARACTER)
+		self.parse_stack.append(self._start_variable)
 		top = self._start_variable
 		loop_counter = 0
 		while top != self._END_OF_FILE_CHARACTER:
 			loop_counter += 1
+			if top == "{":
+				self.symbol_table.one_scope_in()
+			if top == "}":
+				self.symbol_table.one_scope_out()
 			if self.is_semantic_rule(top):
 				code_generator.generate_code(top)
-				print("an")
 				self.parse_stack.pop()
+				top = self.parse_stack[-1]
 				continue
 			if loop_counter > len(tokens) * 20:
 				return (False, "Error1: next token should not be " + str(tokens[idx]))
