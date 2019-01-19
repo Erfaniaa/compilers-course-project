@@ -4,7 +4,6 @@ import re
 import sys
 from scanner import TokenType, Token
 
-
 class Parser:
 	_ARROW_STRING = "->"
 	_RULE_COMMENT_CHARACTER = '#'
@@ -79,8 +78,12 @@ class Parser:
 		idx = 0
 		parse_stack = [self._END_OF_FILE_CHARACTER, self._start_variable]
 		top = self._start_variable
+		loop_counter = 0
 		while top != self._END_OF_FILE_CHARACTER:
-			print(parse_stack, tokens[idx])
+			# print(parse_stack, tokens[idx])
+			loop_counter += 1
+			if loop_counter > len(tokens) * 20:
+				return (False, "Error: next token should not be " + str(tokens[idx]))
 			if top == self._IDENTIFIER_STRING:
 				if tokens[idx].type == TokenType.identifier:
 					idx = idx + 1
@@ -88,7 +91,7 @@ class Parser:
 					top = parse_stack[-1]
 					continue
 				else:
-					return (False, "Error")
+					return (False, "Error: next token should not be " + str(tokens[idx]))
 			elif top == self._NUMBER_STRING:
 				if tokens[idx].type == TokenType.number:
 					idx = idx + 1
@@ -96,7 +99,7 @@ class Parser:
 					top = parse_stack[-1]
 					continue
 				else:
-					return (False, "Error")
+					return (False, "Error: next token should not be " + str(tokens[idx]))
 			elif self.is_terminal(top):
 				if tokens[idx].value == top:
 					idx = idx + 1
@@ -104,18 +107,21 @@ class Parser:
 					top = parse_stack[-1]
 					continue
 				else:
-					return (False, "Error")
+					return (False, "Error: next token should not be " + str(tokens[idx]))
 			try:
-				nxt = tokens[idx].value
-				if tokens[idx].type == TokenType.identifier:
-					nxt = self._IDENTIFIER_STRING
-				if tokens[idx].type == TokenType.number:
-					nxt = self._NUMBER_STRING
-				rule_idx = self._parse_table[top][nxt]
-				product = self._rules[rule_idx][1:]
-				parse_stack.pop()
-				if product != [self._NIL_STRING]:
-					parse_stack.extend(reversed(product))
+				try:
+					nxt = tokens[idx].value
+					if tokens[idx].type == TokenType.identifier:
+						nxt = self._IDENTIFIER_STRING
+					if tokens[idx].type == TokenType.number:
+						nxt = self._NUMBER_STRING
+					rule_idx = self._parse_table[top][nxt]
+					product = self._rules[rule_idx][1:]
+					parse_stack.pop()
+					if product != [self._NIL_STRING]:
+						parse_stack.extend(reversed(product))
+				except:
+					return (False, "Error")
 			except KeyError:
 				return (False, "Error: Unable to find derivation of '{0}' on '{1}'".format(top, nxt))
 			top = parse_stack[-1]
