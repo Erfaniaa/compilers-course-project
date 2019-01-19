@@ -68,6 +68,7 @@ class Parser:
 		self._follows = {}
 		self._predicts = {}
 		self._parse_table = {}
+		self.parse_stack = []
 
 	def set_start_variable(self, start_variable):
 		self._start_variable = start_variable
@@ -75,11 +76,14 @@ class Parser:
 	def _is_nullable_variable(self, variable):
 		return variable in self._nullable_variables
 
+	def get_top_parse_stack(self):
+		return self.parse_stack[-1]
+
 	def match(self, tokens):
-		code_generator = CodeGenerator()
+		code_generator = CodeGenerator(self)
 		tokens.append(self._END_OF_FILE_CHARACTER)
 		idx = 0
-		parse_stack = [self._END_OF_FILE_CHARACTER, self._start_variable]
+		self.parse_stack = [self._END_OF_FILE_CHARACTER, self._start_variable]
 		top = self._start_variable
 		loop_counter = 0
 		while top != self._END_OF_FILE_CHARACTER:
@@ -87,31 +91,31 @@ class Parser:
 			if self.is_semantic_rule(top):
 				code_generator.generate_code(top)
 				print("an")
-				parse_stack.pop()
+				self.parse_stack.pop()
 				continue
 			if loop_counter > len(tokens) * 20:
 				return (False, "Error1: next token should not be " + str(tokens[idx]))
 			if top == self._IDENTIFIER_STRING:
 				if tokens[idx].type == TokenType.identifier:
 					idx = idx + 1
-					parse_stack.pop()
-					top = parse_stack[-1]
+					self.parse_stack.pop()
+					top = self.parse_stack[-1]
 					continue
 				else:
 					return (False, "Error2: next token should not be " + str(tokens[idx]))
 			elif top == self._NUMBER_STRING:
 				if tokens[idx].type == TokenType.number:
 					idx = idx + 1
-					parse_stack.pop()
-					top = parse_stack[-1]
+					self.parse_stack.pop()
+					top = self.parse_stack[-1]
 					continue
 				else:
 					return (False, "Error3: next token should not be " + str(tokens[idx]))
 			elif self.is_terminal(top):
 				if tokens[idx].value == top:
 					idx = idx + 1
-					parse_stack.pop()
-					top = parse_stack[-1]
+					self.parse_stack.pop()
+					top = self.parse_stack[-1]
 					continue
 				else:
 					return (False, "Error4: next token should not be " + str(tokens[idx]))
@@ -124,14 +128,14 @@ class Parser:
 						nxt = self._NUMBER_STRING
 					rule_idx = self._parse_table[top][nxt]
 					product = self._rules[rule_idx][1:]
-					parse_stack.pop()
+					self.parse_stack.pop()
 					if product != [self._NIL_STRING]:
-						parse_stack.extend(reversed(product))
+						self.parse_stack.extend(reversed(product))
 				except:
 					return (False, "Error5")
 			except KeyError:
 				return (False, "Error6: Unable to find derivation of '{0}' on '{1}'".format(top, nxt))
-			top = parse_stack[-1]
+			top = self.parse_stack[-1]
 		return (True, "Sequence matched successfully.")
 
 	def _fill_parse_table(self):

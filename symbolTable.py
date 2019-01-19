@@ -1,33 +1,73 @@
 class Symbol:
 
-	def __init__(self, type_of_var, is_array, function_name, scope, size):
-		self.type_of_var = type_of_var
-		self.is_array = is_array
-		self.function = function_name
-		self.scope = scope
+	def __init__(self, var_name, type_of_var, type_of_data, function_name, scope, size, address):
+		self.var_name = var_name
+		self.type_of_var = type_of_var  # int char float bool
+		self.type_of_data = type_of_data  # array temp_var var
+		self.function = function_name  # global  or function name
+		self.scope = scope  # scope number
 		self.size = size
+		self.address = address  # address
 
-	@staticmethod
-	def get_size(type_of_var):
-		if type_of_var == "int":
-			return 4
-		elif type_of_var == "char":
-			return 2
-		elif type_of_var == "float":
-			return 8
-		elif type_of_var == "bool":
-			return 1
+
+print("hello")
 
 
 class SymbolTable:
 	function = "Global"
 	scope = 0
+	bitmap = []
+	symbols = []
+	symbols_size = {"int": 4, "char": 2, "float": 8, "bool": 1}
+	last_temp_address = 100000000
 
-	def new_variable(self, size):
-		return size
+	def get_size(self, type_of_var):
+		if type_of_var in self.symbols_size:
+			return self.symbols_size[type_of_var]
+		return -1
 
-	def get_variable_size(self, var_name):
-		return
+	def get_more_size(self):
+		for i in range(100000):
+			# print(i)
+			self.bitmap.append(0)
+
+	def make_full_bitmap(self, start, size):
+		for i in range(start, start + size):
+			self.bitmap[i] = 0
+
+	def find_empty_in_bitmap(self, size):
+		empty_counter = 0
+		for i in range(0, len(self.bitmap)):
+			if self.bitmap[i] == 0:
+				empty_counter += 1
+				if empty_counter == size:
+					return i - size + 1
+			else:
+				empty_counter = 0
+		self.get_more_size()
+		return self.find_empty_in_bitmap(size)
+
+	def clear_bitmap(self, start, size):
+		for i in range(start, start + size):
+			self.bitmap[i] = 1
+
+	def new_temp(self):
+		size = 8
+		address = self.last_temp_address
+		self.last_temp_address += size
+		return address
+
+	def new_array(self, name, type_of_var, array_size):
+		size = self.get_size(type_of_var * array_size)
+		address = self.find_empty_in_bitmap(size)
+		array = Symbol(name, type_of_var, "array", self.function, self.scope, size, address)
+		self.symbols.append(array)
+
+	def new_variable(self, name, type_of_var):
+		size = self.get_size(type_of_var)
+		address = self.find_empty_in_bitmap(size)
+		var = Symbol(name, type_of_var, "var", self.function, self.scope, size, address)
+		self.symbols.append(var)
 
 	def get_in_method(self, func_name):
 		self.function = func_name
@@ -35,11 +75,21 @@ class SymbolTable:
 	def one_scope_in(self):
 		self.scope += 1
 
-	def get_var_data(self, var_name):
-		return
-
-	def remove_variable(self, var):
-		return
-
 	def one_scope_out(self):
-		return
+		for symbol in list(self.symbols):
+			if symbol.function == self.function and symbol.scope == self.scope:
+				self.clear_bitmap(symbol.start, symbol.size)
+				self.symbols.remove(symbol)
+		self.scope -= 1
+
+	def get_var_address(self, var_name):
+		best_var_scope = - 1
+		best_symbol_address = -1
+		for symbol in self.symbols:
+			if symbol.var_name == var_name and symbol.function == self.function and self.scope > best_var_scope:
+				best_symbol_address = symbol.address
+		if best_symbol_address == -1:
+			for symbol in self.symbols:
+				if symbol.var_name == var_name and symbol.function == "Global":
+					best_symbol_address = symbol.address
+		return best_symbol_address
