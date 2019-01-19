@@ -9,3 +9,8 @@ class FinalCode:
 
 	def get_pc(self):
 		len(self.codes)
+
+	def print_codes(self):
+		for code in self.codes:
+			for x in code:
+				print(x)
