@@ -1,8 +1,9 @@
-from utils import add_element_to_set, add_list_of_elements_to_set
 import copy
 import re
-import sys
-from scanner import TokenType, Token
+
+from scanner import TokenType
+from utils import add_element_to_set, add_list_of_elements_to_set
+
 
 class Parser:
 	_ARROW_STRING = "->"
@@ -83,6 +84,7 @@ class Parser:
 			# print(parse_stack, tokens[idx])
 			loop_counter += 1
 			if loop_counter > len(tokens) * 20:
+				print("Syntax Error")
 				return (False, "Error: next token should not be " + str(tokens[idx]))
 			if top == self._IDENTIFIER_STRING:
 				if tokens[idx].type == TokenType.identifier:
@@ -91,6 +93,7 @@ class Parser:
 					top = parse_stack[-1]
 					continue
 				else:
+					print("Syntax Error")
 					return (False, "Error: next token should not be " + str(tokens[idx]))
 			elif top == self._NUMBER_STRING:
 				if tokens[idx].type == TokenType.number:
@@ -99,6 +102,7 @@ class Parser:
 					top = parse_stack[-1]
 					continue
 				else:
+					print("Syntax Error")
 					return (False, "Error: next token should not be " + str(tokens[idx]))
 			elif self.is_terminal(top):
 				if tokens[idx].value == top:
@@ -107,6 +111,7 @@ class Parser:
 					top = parse_stack[-1]
 					continue
 				else:
+					print("Syntax Error")
 					return (False, "Error: next token should not be " + str(tokens[idx]))
 			try:
 				try:
@@ -121,8 +126,10 @@ class Parser:
 					if product != [self._NIL_STRING]:
 						parse_stack.extend(reversed(product))
 				except:
+					print("Syntax Error")
 					return (False, "Error")
 			except KeyError:
+				print("Syntax Error")
 				return (False, "Error: Unable to find derivation of '{0}' on '{1}'".format(top, nxt))
 			top = parse_stack[-1]
 		return (True, "Sequence matched successfully.")
