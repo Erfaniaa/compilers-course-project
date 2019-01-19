@@ -28,8 +28,8 @@ class SymbolTable:
 
 	def get_more_size(self):
 		for i in range(100000):
-			# print(i)
 			self.bitmap.append(0)
+			# print(i)
 
 	def make_full_bitmap(self, start, size):
 		for i in range(start, start + size):
