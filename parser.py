@@ -1,6 +1,7 @@
 import copy
 import re
 
+from codeGenerator import CodeGenerator
 from scanner import TokenType
 from utils import add_element_to_set, add_list_of_elements_to_set
 
@@ -75,14 +76,19 @@ class Parser:
 		return variable in self._nullable_variables
 
 	def match(self, tokens):
+		code_generator = CodeGenerator()
 		tokens.append(self._END_OF_FILE_CHARACTER)
 		idx = 0
 		parse_stack = [self._END_OF_FILE_CHARACTER, self._start_variable]
 		top = self._start_variable
 		loop_counter = 0
 		while top != self._END_OF_FILE_CHARACTER:
-			# print(parse_stack, tokens[idx])
 			loop_counter += 1
+			if self.is_semantic_rule(top):
+				code_generator.generate_code(top)
+				print("an")
+				parse_stack.pop()
+				continue
 			if loop_counter > len(tokens) * 20:
 				return (False, "Error1: next token should not be " + str(tokens[idx]))
 			if top == self._IDENTIFIER_STRING:
@@ -141,7 +147,7 @@ class Parser:
 						print(False,
 							  "The grammar is not LL1. Variable: " + str(variable) + " Terminal: " + str(terminal))
 						return (
-						False, "The grammar is not LL1. Variable: " + str(variable) + " Terminal: " + str(terminal))
+							False, "The grammar is not LL1. Variable: " + str(variable) + " Terminal: " + str(terminal))
 					else:
 						self._parse_table[variable][terminal] = rule_id
 		return (True, "Parse table filled successfully.")
@@ -154,6 +160,8 @@ class Parser:
 			for right in self._rules[rule_id]:
 				idx += 1
 				if idx == 1:
+					continue
+				if self.is_semantic_rule(right):
 					continue
 				if self.is_terminal(right):
 					self._predicts[rule_id].add(right)
@@ -176,20 +184,23 @@ class Parser:
 				for rule in self._rules:
 					next_one_first_should_be_in_var_follows = False
 					idx = 0
-					for x in rule:
+					for right in rule:
 						idx += 1
 						if idx == 1:
 							continue
+						if self.is_semantic_rule(right):
+							continue
 						if next_one_first_should_be_in_var_follows:
-							if self.is_variable(x):
-								follows_updated |= add_list_of_elements_to_set(self._follows[variable], self._firsts[x])
-								if not self._is_nullable_variable(x):
+							if self.is_variable(right):
+								follows_updated |= add_list_of_elements_to_set(self._follows[variable],
+																			   self._firsts[right])
+								if not self._is_nullable_variable(right):
 									next_one_first_should_be_in_var_follows = False
-							if self.is_terminal(x):
+							if self.is_terminal(right):
 								next_one_first_should_be_in_var_follows = False
-								follows_updated |= add_element_to_set(self._follows[variable], x)
+								follows_updated |= add_element_to_set(self._follows[variable], right)
 						if not next_one_first_should_be_in_var_follows:
-							if x == variable:
+							if right == variable:
 								next_one_first_should_be_in_var_follows = True
 							continue
 					if next_one_first_should_be_in_var_follows:
@@ -205,6 +216,8 @@ class Parser:
 			for variable in self._variables:
 				for rule in self._variable_rules[variable]:
 					for right in rule:
+						if self.is_semantic_rule(right):
+							continue
 						if self.is_terminal(right) and right != Parser._NIL_STRING:
 							firsts_updated |= add_element_to_set(self._firsts[variable], right)
 						if self.is_variable(right):
@@ -224,6 +237,8 @@ class Parser:
 				for rule in self._variable_rules[variable]:
 					all_nullables = True
 					for right in rule:
+						if self.is_semantic_rule(right):
+							continue
 						if self.is_terminal(right):
 							all_nullables = False
 						elif self.is_variable(right) and right not in self._nullable_variables:
@@ -263,6 +278,7 @@ class Parser:
 			self._nullable_variables.append(rule_text_tokens[0])
 		key = rule_text_tokens[0]
 		del rule_text_tokens[1]
+		# print("x = ", rule_text_tokens)
 		self._rules.append(copy.deepcopy(rule_text_tokens))
 		del rule_text_tokens[0]
 		temp_list = []
