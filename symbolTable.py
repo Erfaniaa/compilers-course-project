@@ -10,12 +10,10 @@ class Symbol:
 		self.address = address  # address
 
 
-
-
 class SymbolTable:
 	function = "Global"
 	scope = 0
-	bitmap = []
+	bitmap = []  # 1 is empty  0 is full
 	symbols = []
 	symbols_size = {"int": 4, "char": 2, "float": 8, "bool": 1}
 	last_temp_address = 100000000
@@ -26,10 +24,8 @@ class SymbolTable:
 		return -1
 
 	def get_more_size(self):
-		for i in range(100000):
-			self.bitmap.append(0)
-
-	# print(i)
+		for i in range(100):
+			self.bitmap.append(1)
 
 	def make_full_bitmap(self, start, size):
 		for i in range(start, start + size):
@@ -38,7 +34,7 @@ class SymbolTable:
 	def find_empty_in_bitmap(self, size):
 		empty_counter = 0
 		for i in range(0, len(self.bitmap)):
-			if self.bitmap[i] == 0:
+			if self.bitmap[i] == 1:
 				empty_counter += 1
 				if empty_counter == size:
 					return i - size + 1
@@ -62,12 +58,16 @@ class SymbolTable:
 		address = self.find_empty_in_bitmap(size)
 		array = Symbol(name, type_of_var, "array", self.function, self.scope, size, address)
 		self.symbols.append(array)
+		print("Array ", name, " of type ", type_of_var, " placed in ", address, " with size ", size)
+		self.make_full_bitmap(address, size)
 
 	def new_variable(self, name, type_of_var):
 		size = self.get_size(type_of_var)
 		address = self.find_empty_in_bitmap(size)
 		var = Symbol(name, type_of_var, "var", self.function, self.scope, size, address)
+		print("Var ", name, " of type ", type_of_var, " placed in ", address, " with size ", size)
 		self.symbols.append(var)
+		self.make_full_bitmap(address, size)
 
 	def get_in_method(self, func_name):
 		self.function = func_name

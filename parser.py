@@ -80,7 +80,10 @@ class Parser:
 	def _is_nullable_variable(self, variable):
 		return variable in self._nullable_variables
 
+
 	def get_top_parse_stack(self):
+		while self.parse_stack[-1] == self._NIL_STRING:
+			self.parse_stack.pop()
 		return self.parse_stack[-1]
 
 	def match(self, tokens):
@@ -92,15 +95,20 @@ class Parser:
 		top = self._start_variable
 		loop_counter = 0
 		while top != self._END_OF_FILE_CHARACTER:
+			# print("top = ", top)
 			loop_counter += 1
+			if top == self._NIL_STRING:
+				top = self.get_top_parse_stack()
+				continue
 			if top == "{":
 				self.symbol_table.one_scope_in()
 			if top == "}":
 				self.symbol_table.one_scope_out()
 			if self.is_semantic_rule(top):
-				code_generator.generate_code(top)
+				semantic = top
 				self.parse_stack.pop()
-				top = self.parse_stack[-1]
+				top = self.get_top_parse_stack()
+				code_generator.generate_code(semantic, tokens[idx])
 				continue
 			if loop_counter > len(tokens) * 20:
 				return (False, "Error1: next token should not be " + str(tokens[idx]))
@@ -108,7 +116,7 @@ class Parser:
 				if tokens[idx].type == TokenType.identifier:
 					idx = idx + 1
 					self.parse_stack.pop()
-					top = self.parse_stack[-1]
+					top = self.get_top_parse_stack()
 					continue
 				else:
 					return (False, "Error2: next token should not be " + str(tokens[idx]))
@@ -116,7 +124,7 @@ class Parser:
 				if tokens[idx].type == TokenType.number:
 					idx = idx + 1
 					self.parse_stack.pop()
-					top = self.parse_stack[-1]
+					top = self.get_top_parse_stack()
 					continue
 				else:
 					return (False, "Error3: next token should not be " + str(tokens[idx]))
@@ -124,7 +132,7 @@ class Parser:
 				if tokens[idx].value == top:
 					idx = idx + 1
 					self.parse_stack.pop()
-					top = self.parse_stack[-1]
+					top = self.get_top_parse_stack()
 					continue
 				else:
 					return (False, "Error4: next token should not be " + str(tokens[idx]))
@@ -144,7 +152,7 @@ class Parser:
 					return (False, "Error5")
 			except KeyError:
 				return (False, "Error6: Unable to find derivation of '{0}' on '{1}'".format(top, nxt))
-			top = self.parse_stack[-1]
+			top = self.get_top_parse_stack()
 		return (True, "Sequence matched successfully.")
 
 	def _fill_parse_table(self):
@@ -265,6 +273,7 @@ class Parser:
 						update = True
 			if not update:
 				break
+		print(self._nullable_variables)
 		return
 
 	def _update_variables(self, l):
