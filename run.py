@@ -13,6 +13,7 @@ scanner_result = scanner.run()
 parser = Parser("PROGRAM")
 parser_run_result = parser.run(open(GRAMMAR_FILE_PATH, 'r'))
 if not parser_run_result[0]:
+	print("Grammer Error")
 	exit()
 # print("variables:", parser.get_variables())
 # print(parser.get_nullable_variables())
