@@ -84,8 +84,7 @@ class Parser:
 			# print(parse_stack, tokens[idx])
 			loop_counter += 1
 			if loop_counter > len(tokens) * 20:
-				print("Syntax Error")
-				return (False, "Error: next token should not be " + str(tokens[idx]))
+				return (False, "Error1: next token should not be " + str(tokens[idx]))
 			if top == self._IDENTIFIER_STRING:
 				if tokens[idx].type == TokenType.identifier:
 					idx = idx + 1
@@ -93,8 +92,7 @@ class Parser:
 					top = parse_stack[-1]
 					continue
 				else:
-					print("Syntax Error")
-					return (False, "Error: next token should not be " + str(tokens[idx]))
+					return (False, "Error2: next token should not be " + str(tokens[idx]))
 			elif top == self._NUMBER_STRING:
 				if tokens[idx].type == TokenType.number:
 					idx = idx + 1
@@ -102,8 +100,7 @@ class Parser:
 					top = parse_stack[-1]
 					continue
 				else:
-					print("Syntax Error")
-					return (False, "Error: next token should not be " + str(tokens[idx]))
+					return (False, "Error3: next token should not be " + str(tokens[idx]))
 			elif self.is_terminal(top):
 				if tokens[idx].value == top:
 					idx = idx + 1
@@ -111,8 +108,7 @@ class Parser:
 					top = parse_stack[-1]
 					continue
 				else:
-					print("Syntax Error")
-					return (False, "Error: next token should not be " + str(tokens[idx]))
+					return (False, "Error4: next token should not be " + str(tokens[idx]))
 			try:
 				try:
 					nxt = tokens[idx].value
@@ -126,11 +122,9 @@ class Parser:
 					if product != [self._NIL_STRING]:
 						parse_stack.extend(reversed(product))
 				except:
-					print("Syntax Error")
-					return (False, "Error")
+					return (False, "Error5")
 			except KeyError:
-				print("Syntax Error")
-				return (False, "Error: Unable to find derivation of '{0}' on '{1}'".format(top, nxt))
+				return (False, "Error6: Unable to find derivation of '{0}' on '{1}'".format(top, nxt))
 			top = parse_stack[-1]
 		return (True, "Sequence matched successfully.")
 

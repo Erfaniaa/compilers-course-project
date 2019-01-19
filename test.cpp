@@ -5,7 +5,7 @@ int main() {
 		c = d;
 	}
 	for (int i = 0; i < n; i++) {
-		c = d;
+		c = d
 		if (a == 10) {
 			d = 40 * a + c;
 		}
