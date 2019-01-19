@@ -41,8 +41,11 @@ class CodeGenerator:
 	def pop_from_semantic_stack(self):
 		return self.semantic_stack.pop()
 
-	def push_next_token(self):
-		return self.semantic_stack.append(self.next_token.value)
+	def push(self):
+		return self.semantic_stack.append(self.get_next_token())
+
+	def get_next_token(self):
+		return self.next_token.value
 
 	def get_top_semantic_stack(self):
 		return self.semantic_stack[-1]
@@ -58,10 +61,30 @@ class CodeGenerator:
 		var_type = self.get_top_semantic_stack()
 		if not self.symbol_table.is_var_declared(name):
 			self.symbol_table.new_variable(name, var_type)
-			self.finalCode.add_rule(["add", self.symbol_table.get_var_address(name), "#" + self.next_token.value])
-			self.finalCode.print_codes()
+			self.finalCode.add_rule(["mov", self.symbol_table.get_var_address(name), "#" + self.get_next_token()])
 
 	def c_desc_normal_array(self):
+		name = self.pop_from_semantic_stack()
+		var_type = self.get_top_semantic_stack()
+		if not self.symbol_table.is_var_declared(name):
+			self.symbol_table.new_array(name, var_type, self.get_next_token())
+
+	def c_desc_weird_array(self):
+		datas = []
+		while self.get_top_semantic_stack() != ']':
+			datas.append(self.pop_from_semantic_stack())
+		self.pop_from_semantic_stack()
+		name = self.pop_from_semantic_stack()
+		var_type = self.pop_from_semantic_stack()
+		if not self.symbol_table.is_var_declared(name):
+			self.symbol_table.new_array(name, var_type, len(datas))
+		var = self.symbol_table.get_var(name)
+		type_size = var.type_size
+		address = var.address
+		for data in reversed(datas):
+			self.finalCode.add_rule(["mov", str(address), "#" + data])
+			address += int(type_size)
+
 		return
 
 	def generate_code(self, semantic_rule, next_token):
@@ -71,7 +94,7 @@ class CodeGenerator:
 		if semantic_rule == "@push_pc":
 			self.push_pc()
 		elif semantic_rule == "@push":
-			self.push_next_token()
+			self.push()
 		elif semantic_rule == "@pop":
 			self.pop_from_semantic_stack()
 		elif semantic_rule == "@c_desc":
@@ -80,3 +103,5 @@ class CodeGenerator:
 			self.c_desc_with_assign()
 		elif semantic_rule == "@c_desc_normal_array":
 			self.c_desc_normal_array()
+		elif semantic_rule == "@c_desc_weird_array":
+			self.c_desc_weird_array()

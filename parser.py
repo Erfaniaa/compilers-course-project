@@ -80,7 +80,6 @@ class Parser:
 	def _is_nullable_variable(self, variable):
 		return variable in self._nullable_variables
 
-
 	def get_top_parse_stack(self):
 		while self.parse_stack[-1] == self._NIL_STRING:
 			self.parse_stack.pop()
@@ -96,6 +95,8 @@ class Parser:
 		loop_counter = 0
 		while top != self._END_OF_FILE_CHARACTER:
 			# print("top = ", top)
+			if top == "ARRAY_DECLARATION4":
+				print(tokens[idx].value)
 			loop_counter += 1
 			if top == self._NIL_STRING:
 				top = self.get_top_parse_stack()

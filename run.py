@@ -1,3 +1,4 @@
+from codeGenerator import FinalCode
 from parser import Parser
 from scanner import FINAL_STATES, TRANSITIONS, KEYWORDS
 from scanner import Scanner
@@ -28,3 +29,4 @@ if not parser_match_result[0]:
 	print(parser_match_result[1])
 	exit()
 print("No Syntax Error")
+FinalCode.print_codes(FinalCode())
