@@ -61,6 +61,9 @@ class CodeGenerator:
 			self.finalCode.add_rule(["add", self.symbol_table.get_var_address(name), "#" + self.next_token.value])
 			self.finalCode.print_codes()
 
+	def c_desc_normal_array(self):
+		return
+
 	def generate_code(self, semantic_rule, next_token):
 		self.next_token = next_token
 		print("semantic rule =", semantic_rule)
@@ -75,3 +78,5 @@ class CodeGenerator:
 			self.c_desc()
 		elif semantic_rule == "@c_desc_with_assign":
 			self.c_desc_with_assign()
+		elif semantic_rule == "@c_desc_normal_array":
+			self.c_desc_normal_array()
