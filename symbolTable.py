@@ -83,6 +83,8 @@ class SymbolTable:
 				self.clear_bitmap(symbol.start, symbol.size)
 				self.symbols.remove(symbol)
 		self.scope -= 1
+		if self.scope == 0:
+			self.function = "Global"
 
 	def get_var(self, var_name):
 		best_var_scope = - 1

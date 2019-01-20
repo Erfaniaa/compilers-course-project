@@ -154,6 +154,7 @@ class Parser:
 			except KeyError:
 				return (False, "Error6: Unable to find derivation of '{0}' on '{1}'".format(top, nxt))
 			top = self.get_top_parse_stack()
+		# TODO  hess mikonam inja baiadd error bede
 		return (True, "Sequence matched successfully.")
 
 	def _fill_parse_table(self):
@@ -274,7 +275,6 @@ class Parser:
 						update = True
 			if not update:
 				break
-		print(self._nullable_variables)
 		return
 
 	def _update_variables(self, l):
