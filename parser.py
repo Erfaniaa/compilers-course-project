@@ -95,8 +95,8 @@ class Parser:
 		loop_counter = 0
 		while top != self._END_OF_FILE_CHARACTER:
 			# print("top = ", top)
-			if top == "ARRAY_DECLARATION4":
-				print(tokens[idx].value)
+			# print(self.parse_stack)
+			# print("next_token = ", tokens[idx].value)
 			loop_counter += 1
 			if top == self._NIL_STRING:
 				top = self.get_top_parse_stack()
@@ -289,7 +289,7 @@ class Parser:
 
 	def _update_grammar(self, rule_text):
 		idx = len(self._rules)
-		rule_text_tokens = rule_text.split(" ")
+		rule_text_tokens = rule_text.split()
 		self._update_variables(rule_text_tokens)
 		self._update_terminals(rule_text_tokens)
 		if len(rule_text_tokens) < 3:

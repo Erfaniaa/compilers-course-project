@@ -1,7 +1,7 @@
 int main() {
-    int x=3,z=2;
+    int x=3,y=2,z;
+    do{
+        y+=1;
 
-    x /= z;
-
-
+    }while(x);
 }

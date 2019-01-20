@@ -98,8 +98,6 @@ class SymbolTable:
 		if best_symbol_address == -1:
 			for symbol in self.symbols:
 				if symbol.var_name == var_name and symbol.function == "Global":
-					best_symbol_address = symbol.address
-					best_var_scope = symbol.scope
 					var = symbol
 		return var
 
