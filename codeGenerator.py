@@ -32,6 +32,10 @@ class CodeGenerator:
 	def __init__(self, parser):
 		self.parser = parser
 
+	def get_address_or_immediate_value(self):
+		#TODO
+		return
+
 	def push_to_semantic_stack(self, value):
 		self.semantic_stack.append(value)
 

@@ -52,7 +52,7 @@ class SymbolTable:
 		size = 8
 		address = self.last_temp_address
 		self.last_temp_address += size
-		return address
+		return "_" + str(address)
 
 	def new_array(self, name, type_of_var, array_size):
 		type_size = self.get_size(type_of_var)
