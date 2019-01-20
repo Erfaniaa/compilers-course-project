@@ -86,7 +86,7 @@ class Parser:
 		return self.parse_stack[-1]
 
 	def match(self, tokens):
-		code_generator = CodeGenerator(self)
+		code_generator = CodeGenerator(self, self.symbol_table)
 		tokens.append(self._END_OF_FILE_CHARACTER)
 		idx = 0
 		self.parse_stack.append(self._END_OF_FILE_CHARACTER)
@@ -101,10 +101,6 @@ class Parser:
 			if top == self._NIL_STRING:
 				top = self.get_top_parse_stack()
 				continue
-			if top == "{":
-				self.symbol_table.one_scope_in()
-			if top == "}":
-				self.symbol_table.one_scope_out()
 			if self.is_semantic_rule(top):
 				semantic = top
 				self.parse_stack.pop()
@@ -130,6 +126,10 @@ class Parser:
 				else:
 					return (False, "Error3: next token should not be " + str(tokens[idx]))
 			elif self.is_terminal(top):
+				if top == "{":
+					self.symbol_table.one_scope_in()
+				if top == "}":
+					self.symbol_table.one_scope_out()
 				if tokens[idx].value == top:
 					idx = idx + 1
 					self.parse_stack.pop()
@@ -336,9 +336,6 @@ class Parser:
 		if not self._fill_parse_table()[0]:
 			return (False, "Error in filling parse table")
 		return (True, "Parser ran successfully.")
-
-	def get_start(self):
-		return self._start
 
 	def get_firsts(self):
 		return self._firsts

@@ -64,6 +64,7 @@ class SymbolTable:
 		self.make_full_bitmap(address, size)
 
 	def new_variable(self, name, type_of_var):
+		print(name, self.scope)
 		size = self.get_size(type_of_var)
 		address = self.find_empty_in_bitmap(size)
 		var = Symbol(name, type_of_var, "var", self.function, self.scope, size, size, address)
@@ -80,7 +81,7 @@ class SymbolTable:
 	def one_scope_out(self):
 		for symbol in list(self.symbols):
 			if symbol.function == self.function and symbol.scope == self.scope:
-				self.clear_bitmap(symbol.start, symbol.size)
+				self.clear_bitmap(symbol.address, symbol.size)
 				self.symbols.remove(symbol)
 		self.scope -= 1
 		if self.scope == 0:

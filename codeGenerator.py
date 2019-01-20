@@ -1,6 +1,3 @@
-from symbolTable import SymbolTable
-
-
 class FinalCode:
 	codes = []
 
@@ -29,14 +26,15 @@ class CodeGenerator:
 	loop_continues_destination = []
 	loop_continues = []
 	loop_breaks = []
-	symbol_table = SymbolTable()
+	symbol_table = {}
 	finalCode = FinalCode()
 	parser = {}
 	next_token = "-1"
 	_WILL_BE_SET_LATER = "%"
-	_START_OF_LOOP_CHAR = "%"
+	_START_OF_LOOP_CHAR = "^"
 
-	def __init__(self, parser):
+	def __init__(self, parser, symbol_table):
+		self.symbol_table = symbol_table
 		self.parser = parser
 
 	def get_address_or_immediate_value(self, value):
@@ -174,7 +172,6 @@ class CodeGenerator:
 		self.loop_breaks.append(self._START_OF_LOOP_CHAR)
 
 	def end_of_loop(self):
-		print("end")
 		break_destination = self.finalCode.get_pc()
 		continue_destination = self.loop_continues_destination.pop()
 		while self.loop_breaks[-1] != self._START_OF_LOOP_CHAR:
@@ -185,7 +182,7 @@ class CodeGenerator:
 		self.loop_breaks.pop()
 
 	def push_continue_destination(self):
-		self.loop_continues.append(self.finalCode.get_pc())
+		self.loop_continues_destination.append(self.finalCode.get_pc())
 
 	def push_break(self):
 		self.loop_breaks.append(self.finalCode.get_pc())
@@ -197,5 +194,5 @@ class CodeGenerator:
 
 	def generate_code(self, semantic_rule, next_token):
 		self.next_token = next_token
-		print("semantic rule = ", semantic_rule)
+		# print("semantic rule = ", semantic_rule)
 		getattr(self, semantic_rule[1:])()
