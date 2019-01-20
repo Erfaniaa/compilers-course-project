@@ -42,10 +42,13 @@ class CodeGenerator:
 		return self.semantic_stack.pop()
 
 	def push(self):
-		return self.semantic_stack.append(self.get_next_token())
+		return self.semantic_stack.append(self.get_next_token_value())
 
-	def get_next_token(self):
+	def get_next_token_value(self):
 		return self.next_token.value
+
+	def get_next_token_type(self):
+		return self.next_token.type
 
 	def get_top_semantic_stack(self):
 		return self.semantic_stack[-1]
@@ -61,13 +64,13 @@ class CodeGenerator:
 		var_type = self.get_top_semantic_stack()
 		if not self.symbol_table.is_var_declared(name):
 			self.symbol_table.new_variable(name, var_type)
-			self.finalCode.add_rule(["mov", self.symbol_table.get_var_address(name), "#" + self.get_next_token()])
+			self.finalCode.add_rule(["mov", self.symbol_table.get_var_address(name), "#" + self.get_next_token_value()])
 
 	def c_desc_normal_array(self):
 		name = self.pop_from_semantic_stack()
 		var_type = self.get_top_semantic_stack()
 		if not self.symbol_table.is_var_declared(name):
-			self.symbol_table.new_array(name, var_type, self.get_next_token())
+			self.symbol_table.new_array(name, var_type, self.get_next_token_value())
 
 	def c_desc_weird_array(self):
 		datas = []
@@ -85,6 +88,40 @@ class CodeGenerator:
 			self.finalCode.add_rule(["mov", str(address), "#" + data])
 			address += int(type_size)
 
+	def complete_assignment(self):
+		oper3_type = str(self.get_next_token_type())
+		oper3_value = str(self.get_next_token_value())
+		oper3 = ""
+		assignment_operator = str(self.pop_from_semantic_stack())
+		oper1 = self.symbol_table.get_var_address(self.pop_from_semantic_stack())
+		if oper3_type == "identifier":
+			oper3 = self.symbol_table.get_var_address(oper3_value)
+		elif oper3_type == "number":
+			oper3 = "#" + str(oper3_value)
+
+		print("oper1 =", oper1)
+		print("oper3 =", oper3)
+		print("assignment_operator=", assignment_operator)
+		code = []
+		right_code = []
+		if assignment_operator == "=":
+			code.append("mov")
+			right_code.append(oper3)
+		else:
+			right_code.append(oper1)
+			right_code.append(oper3)
+			if assignment_operator == "+=":
+				code.append("add")
+			elif assignment_operator == "-=":
+				code.append("sub")
+			elif assignment_operator == "*=":
+				code.append("mult")
+			elif assignment_operator == "/=":
+				code.append("div")
+		code.append(oper1)
+		for right in right_code:
+			code.append(right)
+		self.finalCode.add_rule(code)
 		return
 
 	def generate_code(self, semantic_rule, next_token):
@@ -105,3 +142,5 @@ class CodeGenerator:
 			self.c_desc_normal_array()
 		elif semantic_rule == "@c_desc_weird_array":
 			self.c_desc_weird_array()
+		elif semantic_rule == "@complete_assignment":
+			self.complete_assignment()

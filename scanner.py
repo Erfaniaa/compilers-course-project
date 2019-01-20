@@ -21,7 +21,7 @@ class TokenType(Enum):
 	def __str__(self):
 		return self.name
 
-	def __repr__(self):		
+	def __repr__(self):
 		return self.name
 
 
@@ -37,12 +37,14 @@ class Token:
 		return "(" + self.value + ", " + str(self.type) + ")"
 
 
-KEYWORDS = ['if', 'while', 'do', 'for', 'main', 'return', 'int', 'float', 'double', 'char', 'else', 'break', 'continue', 'and', 'or', 'not']
+KEYWORDS = ['if', 'while', 'do', 'for', 'main', 'return', 'int', 'float', 'double', 'char', 'else', 'break', 'continue',
+			'and', 'or', 'not']
 TRANSITIONS = [
 	Transition('new_token', 'parentheses', r'[\(\)]'),
 	Transition('new_token', 'brackets', r'[\[\]]'),
 	Transition('new_token', 'braces', r'[{}]'),
 	Transition('new_token', 'star', r'\*'),
+	Transition('star', 'star_equal', r'\='),
 	Transition('new_token', 'comma', r'\,'),
 	Transition('new_token', 'plus', r'\+'),
 	Transition('plus', 'plus_plus', r'\+'),
@@ -76,6 +78,7 @@ TRANSITIONS = [
 	Transition('number_dot', 'number_with_fractions', r'[0-9]'),
 	Transition('new_token', 'division_or_comment', r'\/'),
 	Transition('division_or_comment', 'comment_line', r'\/'),
+	Transition('division_or_comment', 'division_equal', r'\='),
 	Transition('comment_line', 'comment_line', r'[^\n]'),
 	Transition('comment_line', 'comment_end', r'\n'),
 	Transition('division_or_comment', 'comment', r'\*'),
@@ -86,6 +89,8 @@ TRANSITIONS = [
 	Transition('comment_end_star', 'comment_end', r'\/'),
 ]
 FINAL_STATES = {
+	'division_equal': TokenType.special_token,
+	'star_equal': TokenType.special_token,
 	'parentheses': TokenType.special_token,
 	'brackets': TokenType.special_token,
 	'braces': TokenType.special_token,
