@@ -88,8 +88,8 @@ ELSE_STATEMENT2 -> { STATEMENT_LANGUAGE @end_of_all_if }
 
 DO_WHILE_STATEMENT -> @start_of_loop do @push_pc {  LOOP_STATEMENT_LANGUAGE } while ( @push_continue_destination BOOLEAN_EXPRESSION @do_while_end ) @end_of_loop
 
+WHILE_STATEMENT -> @start_of_loop while @push_pc (@push_continue_destination BOOLEAN_EXPRESSION @start_of_while ) { LOOP_STATEMENT_LANGUAGE @end_of_while } @end_of_loop
 
-WHILE_STATEMENT -> @start_of_loop while ( BOOLEAN_EXPRESSION ) { LOOP_STATEMENT_LANGUAGE } @end_of_loop
 FOR_STATEMENT -> @start_of_loop for ( SIMPLE_ASSIGNMENT_STATEMENT ; BOOLEAN_EXPRESSION ; INCREMENT_DECREMENT_STATEMENT ) { LOOP_STATEMENT_LANGUAGE } @end_of_loop
 
 SIMPLE_ASSIGNMENT_STATEMENT -> identifier = number

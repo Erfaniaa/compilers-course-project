@@ -55,6 +55,9 @@ class CodeGenerator:
 	def pop(self):
 		return self.semantic_stack.pop()
 
+	def pop_from_semantic_stack(self):
+		return self.pop()
+
 	def push(self):
 		return self.semantic_stack.append(self.get_next_token_value())
 
@@ -183,6 +186,14 @@ class CodeGenerator:
 
 	def push_continue_destination(self):
 		self.loop_continues_destination.append(self.finalCode.get_pc())
+
+	def start_of_while(self):
+		condintion_result = self.pop()
+
+		return
+
+	def end_of_while(self):
+		return
 
 	def push_break(self):
 		self.loop_breaks.append(self.finalCode.get_pc())
