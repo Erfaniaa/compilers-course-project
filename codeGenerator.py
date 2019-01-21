@@ -117,15 +117,9 @@ class CodeGenerator:
 			address += int(type_size)
 
 	def complete_assignment(self):
-		operand3_type = str(self.get_next_token_type())
-		operand3_value = str(self.get_next_token_value())
-		operand3 = ""
+		operand3 = self.get_address_or_immediate_value(self.pop_from_semantic_stack())
 		assignment_operator = str(self.pop_from_semantic_stack())
 		operand1 = self.symbol_table.get_var_address(self.pop_from_semantic_stack())
-		if operand3_type == "identifier":
-			operand3 = self.symbol_table.get_var_address(operand3_value)
-		elif operand3_type == "number":
-			operand3 = "#" + str(operand3_value)
 		code = []
 		right_code = []
 		if assignment_operator == "=":
@@ -192,7 +186,6 @@ class CodeGenerator:
 		code = ["jmp", where_jump_now]
 		self.add_rule(code)
 		self.update_rule(jmp_out_need_pc, 1, self.get_pc())
-		print(self.semantic_stack)
 
 	def end_of_all_if(self):
 		pc = self.get_pc()

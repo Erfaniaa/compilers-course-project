@@ -60,14 +60,14 @@ class SymbolTable:
 		address = self.find_empty_in_bitmap(size)
 		array = Symbol(name, type_of_var, "array", self.function, self.scope, type_size, size, address)
 		self.symbols.append(array)
-		print("Array ", name, " of type ", type_of_var, " placed in ", address, " with size ", size)
+		# print("Array ", name, " of type ", type_of_var, " placed in ", address, " with size ", size)
 		self.make_full_bitmap(address, size)
 
 	def new_variable(self, name, type_of_var, scope_update=0):
 		size = self.get_size(type_of_var)
 		address = self.find_empty_in_bitmap(size)
 		var = Symbol(name, type_of_var, "var", self.function, self.scope + scope_update, size, size, address)
-		print("Variable ", name, " of type ", type_of_var, " placed in ", address, " with size ", size)
+		# print("Variable ", name, " of type ", type_of_var, " placed in ", address, " with size ", size)
 		self.symbols.append(var)
 		self.make_full_bitmap(address, size)
 
