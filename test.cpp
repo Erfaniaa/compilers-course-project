@@ -1,5 +1,4 @@
 int main() {
-    int x[5],y=2,z;
-    int w=3;
-    x[x[2]+3]=4;
+    int p,x[4],y=4,w=2,z=1;
+    x[w+z]=3;
 }

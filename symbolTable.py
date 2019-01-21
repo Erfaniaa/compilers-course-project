@@ -6,8 +6,8 @@ class Symbol:
 		self.type_of_data = type_of_data  # array temp_var var
 		self.function = function_name  # global  or function name
 		self.scope = scope  # scope number
-		self.type_size = type_size
-		self.size = size
+		self.type_size = type_size  # size of it var
+		self.size = size  # size taken
 		self.address = address  # address
 
 
@@ -48,8 +48,7 @@ class SymbolTable:
 		for i in range(start, start + size):
 			self.bitmap[i] = 1
 
-	def new_temp(self):
-		size = 8
+	def new_temp(self, size):
 		address = self.last_temp_address
 		self.last_temp_address += size
 		return "_" + str(address)
@@ -103,6 +102,8 @@ class SymbolTable:
 
 	def get_var_address(self, var_name):
 		var = self.get_var(var_name)
+		print(var)
+		print(var_name)
 		return var.address
 
 	def get_var_type_size(self, var_name):

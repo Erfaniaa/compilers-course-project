@@ -1,0 +1,6 @@
+[(int, keyword), (main, keyword), ((, special_token), (), special_token), ({, special_token), (/** this is a 
+
+	test
+
+	**/, comment), (int, keyword), (a, identifier), (=, special_token), (10, number), (,, special_token), (b, identifier), (=, special_token), (20, number), (;, special_token), (if, keyword), ((, special_token), (a, identifier), (>=, special_token), (b, identifier), (), special_token), ({, special_token), (double, keyword), (c, identifier), (=, special_token), (10, number), (;, special_token), (}, special_token), (else, keyword), ({, special_token), (float, keyword), (d, identifier), (=, special_token), (.123, number), (+, special_token), (40.56, number), (;, special_token), (b, identifier), (--, special_token), (;, special_token), (a, identifier), (++, special_token), (;, special_token), (}, special_token), (// finished!
+, comment), (}, special_token)]

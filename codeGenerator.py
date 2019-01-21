@@ -38,6 +38,9 @@ class CodeGenerator:
 		self.symbol_table = symbol_table
 		self.parser = parser
 
+	def get_temp(self, size):
+		return self.symbol_table.new_temp(size)
+
 	def get_address_or_immediate_value(self, value):
 		if value[0] == "_":
 			return value[1:]
@@ -56,8 +59,8 @@ class CodeGenerator:
 	def add_rule(self, rule):
 		self.finalCode.add_rule(rule)
 
-	def check_type(self, operand0, operand1, operan2):
-		return True
+	def check_type(self, operand0, operand2, operan3):
+		return 4
 
 	def update_rule(self, rule_number, operand_number, value):
 		self.finalCode.update_rule(int(rule_number), int(operand_number), value)
@@ -121,9 +124,10 @@ class CodeGenerator:
 			address += int(type_size)
 
 	def complete_assignment(self):
+		self.finalCode.print_codes()
 		operand3 = self.get_address_or_immediate_value(self.pop_from_semantic_stack())
 		assignment_operator = str(self.pop_from_semantic_stack())
-		operand1 = self.symbol_table.get_var_address(self.pop_from_semantic_stack())
+		operand1 = self.get_address_or_immediate_value(self.pop_from_semantic_stack())
 		code = []
 		right_code = []
 		if assignment_operator == "=":
@@ -273,22 +277,55 @@ class CodeGenerator:
 		self.add_rule(["jmp", self._WILL_BE_SET_LATER])
 
 	def mult_expression(self):
-		return
+		operand0 = "mult"
+		self.math_expression_for_all(operand0)
 
 	def divide_expression(self):
-		return
+		operand0 = "div"
+		self.math_expression_for_all(operand0)
 
 	def add_expression(self):
-		return
+		operand0 = "add"
+		self.math_expression_for_all(operand0)
 
-	def add_expression(self):
-		return
+	def sub_expression(self):
+		operand0 = "sub"
+		self.math_expression_for_all(operand0)
 
 	def math_expression_for_all(self, operand0):
-		return
+		oper2_var = self.pop_from_semantic_stack()
+		oper3_var = self.pop_from_semantic_stack()
+		operand2 = self.get_address_or_immediate_value(oper2_var)
+		operand3 = self.get_address_or_immediate_value(oper3_var)
+		temp_size = self.check_type(operand0, operand2, operand3)
+		if temp_size < 0:
+			# TODO Error
+			return
+		destination_temp = self.get_temp(temp_size)
+		operand1 = self.get_address_or_immediate_value(destination_temp)
+		code = [operand0, operand1, operand2, operand3]
+		self.add_rule(code)
+		self.push_to_semantic_stack(destination_temp)
 
 	def array(self):
-		return
+		index = self.get_address_or_immediate_value(self.pop_from_semantic_stack())
+		print("index = ", index)
+		array_name = self.pop_from_semantic_stack()
+		print("array_name = ", array_name)
+		array = self.symbol_table.get_var(array_name)
+		if array.type_of_data != "array":
+			# TODO array
+			return
+		array_start = array.address
+		array_type_size = array.type_size
+		temp1_address = self.get_address_or_immediate_value(self.get_temp(4))
+		temp2 = self.get_temp(4)
+		temp2_address = self.get_address_or_immediate_value(temp2)
+		code1 = ["mult", temp1_address, array_type_size, index]
+		code2 = ["add", temp2_address, array_start, temp1_address]
+		self.add_rule(code1)
+		self.add_rule(code2)
+		self.push_to_semantic_stack(temp2)
 
 	def push_continue(self):
 		self.loop_continues.append(self.get_pc())
@@ -296,5 +333,5 @@ class CodeGenerator:
 
 	def generate_code(self, semantic_rule, next_token):
 		self.next_token = next_token
-		# print("semantic rule = ", semantic_rule)
+		print("semantic rule = ", semantic_rule)
 		getattr(self, semantic_rule[1:])()
