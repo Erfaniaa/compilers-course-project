@@ -94,7 +94,7 @@ class Parser:
 		top = self._start_variable
 		loop_counter = 0
 		while top != self._END_OF_FILE_CHARACTER:
-			# print("top = ", top)
+			print("top = ", top)
 			# print(self.parse_stack)
 			# print("next_token = ", tokens[idx].value)
 			loop_counter += 1

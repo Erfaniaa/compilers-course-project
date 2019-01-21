@@ -37,10 +37,11 @@ class Token:
 		return "(" + self.value + ", " + str(self.type) + ")"
 
 
-KEYWORDS = ['if', 'while', 'do', 'for', 'main', 'return', 'int', 'float', 'double', 'char', 'else', 'break', 'continue',
-			'and', 'or', 'not']
+KEYWORDS = ['switch', 'case', 'if', 'default', 'while', 'do', 'for', 'main', 'return', 'int', 'float', 'double', 'char',
+			'else', 'break', 'continue', 'and', 'or', 'not']
 TRANSITIONS = [
 	Transition('new_token', 'parentheses', r'[\(\)]'),
+	Transition('new_token', 'colon', r'\:'),
 	Transition('new_token', 'brackets', r'[\[\]]'),
 	Transition('new_token', 'braces', r'[{}]'),
 	Transition('new_token', 'star', r'\*'),
@@ -89,6 +90,7 @@ TRANSITIONS = [
 	Transition('comment_end_star', 'comment_end', r'\/'),
 ]
 FINAL_STATES = {
+	'colon': TokenType.special_token,
 	'division_equal': TokenType.special_token,
 	'star_equal': TokenType.special_token,
 	'parentheses': TokenType.special_token,

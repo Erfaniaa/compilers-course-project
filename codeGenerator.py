@@ -1,11 +1,11 @@
 class FinalCode:
 	codes = []
 
-	def update_rule(self, rule_number, operand_number, value):
-		self.codes[rule_number][operand_number] = value
+	def update_code(self, code_number, operand_number, value):
+		self.codes[code_number][operand_number] = value
 
-	def add_rule(self, rule):
-		self.codes.append(rule)
+	def add_code(self, code):
+		self.codes.append(code)
 
 	def get_pc(self):
 		return len(self.codes)
@@ -33,7 +33,9 @@ class CodeGenerator:
 	next_token = "-1"
 	_WILL_BE_SET_LATER = "%"
 	_START_OF_LOOP_CHAR = "^"
+	_HAVE_DEFAULT_CHAR = "~"
 	_START_OF_IF = "#"
+	_START_OF_SWITCH = "!"
 
 	def __init__(self, parser, symbol_table):
 		self.symbol_table = symbol_table
@@ -62,14 +64,14 @@ class CodeGenerator:
 	def get_pc(self):
 		return self.finalCode.get_pc()
 
-	def add_rule(self, rule):
-		self.finalCode.add_rule(rule)
+	def add_code(self, code):
+		self.finalCode.add_code(code)
 
 	def check_type(self, operand0, operand2, operan3):
 		return 4
 
-	def update_rule(self, rule_number, operand_number, value):
-		self.finalCode.update_rule(int(rule_number), int(operand_number), value)
+	def update_code(self, code_number, operand_number, value):
+		self.finalCode.update_code(int(code_number), int(operand_number), value)
 
 	def push_pc(self):
 		self.push_to_semantic_stack(self.get_pc())
@@ -105,7 +107,7 @@ class CodeGenerator:
 			self.symbol_table.new_variable(name, var_type)
 			operand2 = self.get_address_or_immediate_value(self.get_next_token_value())
 			code = ["mov", self.symbol_table.get_var_address(name), operand2]
-			self.add_rule(code)
+			self.add_code(code)
 
 	def c_desc_normal_array(self):
 		name = self.pop_from_semantic_stack()
@@ -126,7 +128,7 @@ class CodeGenerator:
 		type_size = var.type_size
 		address = var.address
 		for data in reversed(datas):
-			self.add_rule(["mov", str(address), self.get_address_or_immediate_value(data)])
+			self.add_code(["mov", str(address), self.get_address_or_immediate_value(data)])
 			address += int(type_size)
 
 	def complete_assignment(self):
@@ -153,7 +155,7 @@ class CodeGenerator:
 		code.append(operand1)
 		for right in right_code:
 			code.append(right)
-		self.add_rule(code)
+		self.add_code(code)
 		return
 
 	def push_start_of_if(self):
@@ -163,24 +165,24 @@ class CodeGenerator:
 		condition_result = self.get_address_or_immediate_value(self.pop_from_semantic_stack())
 		code = ["jnz", str(condition_result), self._WILL_BE_SET_LATER]
 		self.push_to_semantic_stack(self.get_pc())
-		self.add_rule(code)
+		self.add_code(code)
 
 	def if_jump_out(self):
 		where_to_update = int(self.pop_from_semantic_stack())
 		last_of_stl = self.get_pc()
-		self.update_rule(where_to_update, 2, int(last_of_stl + 1))
+		self.update_code(where_to_update, 2, int(last_of_stl + 1))
 		code = ["jmp", "%"]
 		self.push_to_semantic_stack(last_of_stl)
-		self.add_rule(code)
+		self.add_code(code)
 
 	def for_jump_out(self):
 		condition_result = self.get_address_or_immediate_value(self.pop_from_semantic_stack())
 		self.push_pc()
 		code1 = ["jnz", condition_result, self._WILL_BE_SET_LATER]
-		self.add_rule(code1)
+		self.add_code(code1)
 		self.push_pc()
 		code2 = ["jmp", self._WILL_BE_SET_LATER]
-		self.add_rule(code2)
+		self.add_code(code2)
 		self.push_pc()
 
 	def for_go_to_expression(self):
@@ -189,8 +191,8 @@ class CodeGenerator:
 		jnz_st_pc = self.pop_from_semantic_stack()
 		where_jump_now = self.pop_from_semantic_stack()
 		code = ["jmp", where_jump_now]
-		self.add_rule(code)
-		self.update_rule(jnz_st_pc, 2, self.get_pc())
+		self.add_code(code)
+		self.update_code(jnz_st_pc, 2, self.get_pc())
 		self.push_to_semantic_stack(x)
 		self.push_to_semantic_stack(jmp_out_pc)
 
@@ -198,20 +200,20 @@ class CodeGenerator:
 		jmp_out_need_pc = self.pop_from_semantic_stack()
 		where_jump_now = self.pop_from_semantic_stack()
 		code = ["jmp", where_jump_now]
-		self.add_rule(code)
-		self.update_rule(jmp_out_need_pc, 1, self.get_pc())
+		self.add_code(code)
+		self.update_code(jmp_out_need_pc, 1, self.get_pc())
 
 	def end_of_all_if(self):
 		pc = self.get_pc()
 		while str(self.get_top_semantic_stack()) != self._START_OF_IF:
 			temp = int(self.pop_from_semantic_stack())
-			self.update_rule(temp, 1, pc)
+			self.update_code(temp, 1, pc)
 		self.pop_from_semantic_stack()
 
 	def do_while_end(self):
 		condition_result = self.pop_from_semantic_stack()
 		start_of_do_while = self.pop_from_semantic_stack()
-		self.add_rule(["jnz", str(condition_result), str(start_of_do_while)])
+		self.add_code(["jnz", str(condition_result), str(start_of_do_while)])
 
 	def start_of_loop(self):
 		self.loop_continues.append(self._START_OF_LOOP_CHAR)
@@ -221,9 +223,9 @@ class CodeGenerator:
 		break_destination = self.get_pc()
 		continue_destination = self.loop_continues_destination.pop()
 		while self.loop_breaks[-1] != self._START_OF_LOOP_CHAR:
-			self.update_rule(self.loop_breaks.pop(), 1, break_destination)
+			self.update_code(self.loop_breaks.pop(), 1, break_destination)
 		while self.loop_continues[-1] != self._START_OF_LOOP_CHAR:
-			self.update_rule(self.loop_continues.pop(), 1, continue_destination)
+			self.update_code(self.loop_continues.pop(), 1, continue_destination)
 		self.loop_continues.pop()
 		self.loop_breaks.pop()
 
@@ -231,7 +233,7 @@ class CodeGenerator:
 		value = self.get_address_or_immediate_value(self.get_next_token_value())
 		destination = self.get_address_or_immediate_value(self.pop_from_semantic_stack())
 		code = ["mov", value, destination]
-		self.add_rule(code)
+		self.add_code(code)
 
 	def for_simple_declaration(self):
 		value = self.get_address_or_immediate_value(self.get_next_token_value())
@@ -240,7 +242,7 @@ class CodeGenerator:
 		if not self.symbol_table.is_var_declared(var_name):
 			self.symbol_table.new_variable(var_name, var_type, 1)
 			code = ["mov", self.symbol_table.get_var_address(var_name), value]
-			self.add_rule(code)
+			self.add_code(code)
 
 	def id_inc_dec(self):
 		operand = self.pop_from_semantic_stack()
@@ -260,7 +262,7 @@ class CodeGenerator:
 			code.append("sub")
 		code.append(id)
 		code.append("#1")
-		self.add_rule(code)
+		self.add_code(code)
 
 	def push_continue_destination(self):
 		self.loop_continues_destination.append(self.get_pc())
@@ -269,18 +271,18 @@ class CodeGenerator:
 		condition_result = self.pop_from_semantic_stack()
 		self.push_to_semantic_stack(self.get_pc())
 		code = ["jz", condition_result, self._WILL_BE_SET_LATER]
-		self.add_rule(code)
+		self.add_code(code)
 
 	def end_of_while(self):
 		where_dest_should_update = self.pop_from_semantic_stack()
 		where_should_jump = self.pop_from_semantic_stack()
 		code = ["jmp", where_should_jump]
-		self.add_rule(code)
-		self.update_rule(where_dest_should_update, 2, self.get_pc())
+		self.add_code(code)
+		self.update_code(where_dest_should_update, 2, self.get_pc())
 
 	def push_break(self):
 		self.loop_breaks.append(self.get_pc())
-		self.add_rule(["jmp", self._WILL_BE_SET_LATER])
+		self.add_code(["jmp", self._WILL_BE_SET_LATER])
 
 	def mult_expression(self):
 		operand0 = "mult"
@@ -310,7 +312,7 @@ class CodeGenerator:
 		destination_temp = self.get_temp(temp_size)
 		operand1 = self.get_address_or_immediate_value(destination_temp)
 		code = [operand0, operand1, operand2, operand3]
-		self.add_rule(code)
+		self.add_code(code)
 		self.push_to_semantic_stack(destination_temp)
 
 	def array(self):
@@ -327,15 +329,53 @@ class CodeGenerator:
 		temp2_address = self.get_address_or_immediate_value(temp2)
 		code1 = ["mult", temp1_address, array_type_size, index]
 		code2 = ["add", temp2_address, array_start, temp1_address]
-		self.add_rule(code1)
-		self.add_rule(code2)
+		self.add_code(code1)
+		self.add_code(code2)
 		self.push_to_semantic_stack("@" + str(temp2))
 
 	def push_continue(self):
 		self.loop_continues.append(self.get_pc())
-		self.add_rule(["jmp", self._WILL_BE_SET_LATER])
+		self.add_code(["jmp", self._WILL_BE_SET_LATER])
 
-	def generate_code(self, semantic_rule, next_token):
+	def start_of_switch_case(self):
+		self.loop_breaks.append(self._START_OF_LOOP_CHAR)
+		self.push_pc()
+		self.push()
+		self.push_to_semantic_stack(self._START_OF_SWITCH)
+		code = ["jmp", self._WILL_BE_SET_LATER]
+		self.add_code(code)
+
+	def push_default(self):
+		self.push_pc()
+		self.push_to_semantic_stack(self._HAVE_DEFAULT_CHAR)
+
+	def complete_switch(self):
+		default_pc = -1
+		here_start_pc = self.get_pc()
+		if self.get_top_semantic_stack() == self._HAVE_DEFAULT_CHAR:
+			self.pop_from_semantic_stack()
+			default_pc = self.pop_from_semantic_stack()
+		jeq = []
+		while self.get_top_semantic_stack() != self._START_OF_SWITCH:
+			jeq.append([self.pop_from_semantic_stack(), self.pop_from_semantic_stack()])
+		self.pop_from_semantic_stack()
+		var = self.pop_from_semantic_stack()
+		start_pc = self.pop_from_semantic_stack()
+		for case in reversed(jeq):
+			equal_value = self.get_address_or_immediate_value(case[0])
+			code = ["jeq", self.get_address_or_immediate_value(var), equal_value, case[1]]
+			self.add_code(code)
+		self.update_code(start_pc, 1, here_start_pc)
+		if default_pc != -1:
+			code = ["jmp", default_pc]
+			self.add_code(code)
+		end_pc = self.get_pc()
+		print(start_pc)
+		while self.loop_breaks[-1] != self._START_OF_LOOP_CHAR:
+			self.update_code(self.loop_breaks.pop(), 1, end_pc)
+		self.loop_breaks.pop()
+
+	def generate_code(self, semantic_code, next_token):
 		self.next_token = next_token
-		# print("semantic rule = ", semantic_rule)
-		getattr(self, semantic_rule[1:])()
+		# print("semantic code = ", semantic_code)
+		getattr(self, semantic_code[1:])()
