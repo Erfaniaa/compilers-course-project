@@ -1,4 +1,2 @@
-int main() {
-    int a,b,c,d;
-    bool e;
+function int main() {
 }

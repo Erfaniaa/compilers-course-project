@@ -94,9 +94,10 @@ class Parser:
 		top = self._start_variable
 		loop_counter = 0
 		while top != self._END_OF_FILE_CHARACTER:
-			# print("top = ", top)
-			# print(self.parse_stack)
-			# print("next_token = ", tokens[idx].value)
+			print("top = ", top)
+			print(self.parse_stack)
+			print(tokens[idx:	])
+			print("next_token = ", tokens[idx].value)
 			loop_counter += 1
 			if top == self._NIL_STRING:
 				top = self.get_top_parse_stack()
@@ -172,7 +173,6 @@ class Parser:
 										  terminal))
 					else:
 						self._parse_table[variable][terminal] = rule_id
-		return (True, "Parse table filled successfully.")
 
 	def _find_all_predicts(self):
 		for rule_id in range(len(self._rules)):
@@ -329,9 +329,7 @@ class Parser:
 		self._find_all_firsts()
 		self._find_all_follows()
 		self._find_all_predicts()
-		if not self._fill_parse_table()[0]:
-			error_handler("Grammer Error", "Error in filling parse table")
-		return (True, "Parser ran successfully.")
+		self._fill_parse_table()
 
 	def get_firsts(self):
 		return self._firsts
