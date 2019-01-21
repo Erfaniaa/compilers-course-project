@@ -1,4 +1,5 @@
+int b;
 function int main() {
-    int a,b,c,d;
+    int a,b=2,c,d;
     bool e;
 }

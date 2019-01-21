@@ -3,7 +3,7 @@ import re
 
 from codeGenerator import CodeGenerator
 from codeGenerator import FinalCode
-from scanner import TokenType
+from scanner import TokenType, Token
 from symbolTable import SymbolTable
 from utils import add_element_to_set, add_list_of_elements_to_set, error_handler
 
@@ -87,6 +87,7 @@ class Parser:
 
 	def match(self, tokens):
 		code_generator = CodeGenerator(self, self.symbol_table)
+		tokens.append(Token('eof', 'keyword'))
 		tokens.append(self._END_OF_FILE_CHARACTER)
 		idx = 0
 		self.parse_stack.append(self._END_OF_FILE_CHARACTER)
@@ -94,11 +95,11 @@ class Parser:
 		top = self._start_variable
 		loop_counter = 0
 		while top != self._END_OF_FILE_CHARACTER:
-			print("top = ", top)
-			print(self.parse_stack)
-			print(tokens[idx:])
-			print(tokens[idx])
-			print("next_token = ", tokens[idx].value)
+			# print("top = ", top)
+			# print(self.parse_stack)
+			# print(tokens[idx:])
+			# print(tokens[idx])
+			# print("next_token = ", tokens[idx].value)
 			loop_counter += 1
 			if top == self._NIL_STRING:
 				top = self.get_top_parse_stack()
