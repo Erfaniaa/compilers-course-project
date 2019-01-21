@@ -8,8 +8,8 @@ GLOBAL_STATEMENT -> DECLARATION_STATEMENT
 
 
 FUNCTION_DECLARATION -> @start_of_function function FUNCTION_DECLARATION2
-FUNCTION_DECLARATION2 -> @push void @push identifier ( FUNCTION_VARIABLES ) { @function_declaration VOID_FUNCTION_STATEMENT_LANGUAGE }
-FUNCTION_DECLARATION2 -> @push TYPE @push identifier ( FUNCTION_VARIABLES ) { @function_declaration NOT_VOID_FUNCTION_STATEMENT_LANGUAGE }
+FUNCTION_DECLARATION2 -> @push void @push identifier ( FUNCTION_VARIABLES ) { @function_declaration VOID_FUNCTION_STATEMENT_LANGUAGE @jump_out_of_function }
+FUNCTION_DECLARATION2 -> @push TYPE @push identifier ( FUNCTION_VARIABLES ) { @function_declaration NOT_VOID_FUNCTION_STATEMENT_LANGUAGE @jump_out_of_function}
 
 FUNCTION_VARIABLES -> nil
 FUNCTION_VARIABLES -> @push TYPE @push identifier FUNCTION_VARIABLES2

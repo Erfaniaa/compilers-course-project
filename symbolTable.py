@@ -30,6 +30,9 @@ class SymbolTable:
 		for i in range(100):
 			self.bitmap.append(1)
 
+	def set_function_name(self, func_name):
+		self.function = func_name
+
 	def make_full_bitmap(self, start, size):
 		for i in range(start, start + size):
 			self.bitmap[i] = 0
@@ -76,7 +79,8 @@ class SymbolTable:
 		size = int(type_size) * int(array_size)
 		address = self.find_empty_in_bitmap(size)
 		array = Symbol(name, type_of_var, "array", self.function, self.scope, type_size, size, address)
-		# print("Array ", name, " of type ", type_of_var, " placed in ", address, " with size ", size)
+		# print("Array ", name, " of type ", type_of_var, " placed in ", address, " with size ", size, " in function ",
+		# 	  self.function)
 		self.symbols.append(array)
 		self.make_full_bitmap(address, size)
 
@@ -84,7 +88,8 @@ class SymbolTable:
 		size = self.get_size(type_of_var)
 		address = self.find_empty_in_bitmap(size)
 		var = Symbol(name, type_of_var, "var", self.function, self.scope + scope_update, size, size, address)
-		# print("Variable ", name, " of type ", type_of_var, " placed in ", address, " with size ", size)
+		# print("Variable ", name, " of type ", type_of_var, " placed in ", address, " with size ", size, " in function ",
+		# 	  self.function)
 		self.symbols.append(var)
 		self.make_full_bitmap(address, size)
 

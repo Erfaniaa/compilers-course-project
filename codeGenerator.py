@@ -1,8 +1,6 @@
 from utils import error_handler
 
 
-
-
 class FinalCode:
 	codes = []
 
@@ -27,6 +25,8 @@ class FinalCode:
 
 
 class CodeGenerator:
+	function_return_value = []
+	function_return_address = []
 	function_signatures = []
 	semantic_stack = []
 	switch_stack = []
@@ -408,9 +408,46 @@ class CodeGenerator:
 		self.pop_from_semantic_stack()
 		if len(pushed) == 2 and pushed[1] == "void" and pushed[0] == "main":
 			self.update_code(0, 1, self.get_pc())
-		function_return_type =pushed.pop()
-		function_name =pushed.pop()
-
+		function_return_type = pushed.pop()
+		function_name = pushed.pop()
+		self.symbol_table.set_function_name(function_name)
+		function_starting_point = self.get_pc()
+		function_variables_names = []
+		function_variables_types = []
+		found = False
+		while len(pushed) != 0:
+			function_variables_types.append(pushed.pop())
+			function_variables_names.append(pushed.pop())
+		function_declaration = {}
+		for item in self.function_signatures:
+			if item['function_name'] != function_name:
+				continue
+			if item['function_name'] == "main":
+				error_handler("Syntax Error", "There is at least 2 main in your code")
+			if item['function_return_type'] != function_return_type:
+				error_handler("Syntax Error", " function " + function_name + "has declared with different return type ")
+			for signature in item['signatures']:
+				is_same = True
+				if len(signature['var_types']) != len(function_variables_types):
+					continue
+				for i in range(0, len(function_variables_types)):
+					if signature['var_types'][i] != function_variables_types[i]:
+						is_same = False
+						break
+				if is_same:
+					error_handler("Syntax Error", " function " + function_name + " has declared with same signature")
+			found = True
+			function_declaration = item
+			break
+		obj = {"var_types": function_variables_types, "var_names": function_variables_names,
+			   "start_point": function_starting_point}
+		if found:
+			function_declaration['signatures'].append(obj)
+		else:
+			function_declaration['function_return_type'] = function_return_type
+			function_declaration['function_name'] = function_name
+			function_declaration['signatures'] = [obj]
+			self.function_signatures.append(function_declaration)
 
 	def generate_code(self, semantic_code, next_token):
 		self.next_token = next_token
