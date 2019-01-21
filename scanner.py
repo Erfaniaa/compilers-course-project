@@ -37,8 +37,8 @@ class Token:
 		return "(" + self.value + ", " + str(self.type) + ")"
 
 
-KEYWORDS = ['switch', 'case', 'if', 'default', 'while', 'do', 'for', 'main', 'return', 'int', 'float', 'double', 'char',
-			'else', 'break', 'continue', 'and', 'or', 'not']
+KEYWORDS = ['bool', 'switch', 'case', 'if', 'default', 'while', 'do', 'for', 'main', 'return', 'int', 'float', 'double',
+			'char', 'else', 'break', 'continue', 'and', 'or', 'not']
 TRANSITIONS = [
 	Transition('new_token', 'parentheses', r'[\(\)]'),
 	Transition('new_token', 'colon', r'\:'),

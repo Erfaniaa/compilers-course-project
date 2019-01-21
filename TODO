@@ -1,6 +1,4 @@
-#TODO cast char True False float to number
-#TODO check Type
-#TODO temp need size and can find out what is temp size
+#TODO cast char float to number  # True False
 #TODO function call
 #TODO error handling code generator
 #TODO error handling declaration

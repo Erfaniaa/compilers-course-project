@@ -17,7 +17,6 @@ class SymbolTable:
 	bitmap = []  # 1 is empty  0 is full
 	symbols = []
 	symbols_size = {"int": 4, "char": 2, "float": 8, "bool": 1}
-	last_temp_address = 100000000
 
 	def get_size(self, type_of_var):
 		if type_of_var in self.symbols_size:
@@ -44,22 +43,38 @@ class SymbolTable:
 		self.get_more_size()
 		return self.find_empty_in_bitmap(size)
 
+	def find_empty_in_bitmap_for_temp(self, size):
+		empty_counter = 0
+		for i in range(10000, len(self.bitmap)):
+			if self.bitmap[i] == 1:
+				empty_counter += 1
+				if empty_counter == size:
+					return i - size + 1
+			else:
+				empty_counter = 0
+		self.get_more_size()
+		return self.find_empty_in_bitmap_for_temp(size)
+
 	def clear_bitmap(self, start, size):
 		for i in range(start, start + size):
 			self.bitmap[i] = 1
 
-	def new_temp(self, size):
-		address = self.last_temp_address
-		self.last_temp_address += size
-		return "_" + str(address)
+	def new_temp(self, type_of_temp):
+		size = self.get_size(type_of_temp)
+		address = self.find_empty_in_bitmap_for_temp(size)
+		name = "_" + str(address)
+		temp = Symbol(name, type_of_temp, "temp", self.function, self.scope, size, size, address)
+		# print("Temp ", name, " of type ", type_of_var, " placed in ", address, " with size ", size)
+		self.symbols.append(temp)
+		self.make_full_bitmap(address, size)
 
 	def new_array(self, name, type_of_var, array_size):
 		type_size = self.get_size(type_of_var)
 		size = int(type_size) * int(array_size)
 		address = self.find_empty_in_bitmap(size)
 		array = Symbol(name, type_of_var, "array", self.function, self.scope, type_size, size, address)
-		self.symbols.append(array)
 		# print("Array ", name, " of type ", type_of_var, " placed in ", address, " with size ", size)
+		self.symbols.append(array)
 		self.make_full_bitmap(address, size)
 
 	def new_variable(self, name, type_of_var, scope_update=0):
@@ -111,6 +126,10 @@ class SymbolTable:
 	def get_var_size(self, var_name):
 		var = self.get_var(var_name)
 		return var.size
+
+	def get_var_type(self, var_name):
+		var = self.get_var(var_name)
+		return var.type_of_var
 
 	def is_array(self, name):
 		if self.get_var(name).type_of_data == "array":
