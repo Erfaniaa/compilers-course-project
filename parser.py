@@ -5,7 +5,7 @@ from codeGenerator import CodeGenerator
 from codeGenerator import FinalCode
 from scanner import TokenType
 from symbolTable import SymbolTable
-from utils import add_element_to_set, add_list_of_elements_to_set
+from utils import add_element_to_set, add_list_of_elements_to_set, error_handler
 
 
 class Parser:
@@ -108,7 +108,7 @@ class Parser:
 				code_generator.generate_code(semantic, tokens[idx])
 				continue
 			if loop_counter > len(tokens) * 20:
-				return (False, "Error1: next token should not be " + str(tokens[idx]))
+				error_handler("Syntax Error", " (1) next token should not be " + str(tokens[idx]))
 			if top == self._IDENTIFIER_STRING:
 				if tokens[idx].type == TokenType.identifier:
 					idx = idx + 1
@@ -116,7 +116,7 @@ class Parser:
 					top = self.get_top_parse_stack()
 					continue
 				else:
-					return (False, "Error2: next token should not be " + str(tokens[idx]))
+					error_handler("Syntax Error", " (2) next token should not be " + str(tokens[idx]))
 			elif top == self._NUMBER_STRING:
 				if tokens[idx].type == TokenType.number:
 					idx = idx + 1
@@ -124,7 +124,7 @@ class Parser:
 					top = self.get_top_parse_stack()
 					continue
 				else:
-					return (False, "Error3: next token should not be " + str(tokens[idx]))
+					error_handler("Syntax Error", " (3) next token should not be " + str(tokens[idx]))
 			elif self.is_terminal(top):
 				if top == "{":
 					self.symbol_table.one_scope_in()
@@ -136,7 +136,7 @@ class Parser:
 					top = self.get_top_parse_stack()
 					continue
 				else:
-					return (False, "Error4: next token should not be " + str(tokens[idx]))
+					error_handler("Syntax Error", " (4) next token should not be " + str(tokens[idx]))
 			try:
 				try:
 					nxt = tokens[idx].value
@@ -150,12 +150,12 @@ class Parser:
 					if product != [self._NIL_STRING]:
 						self.parse_stack.extend(reversed(product))
 				except:
-					return (False, "Error5")
+					error_handler("Syntax Error", " (5)")
 			except KeyError:
-				return (False, "Error6: Unable to find derivation of '{0}' on '{1}'".format(top, nxt))
+				error_handler("Syntax Error", "6: Unable to find derivation of '{0}' on '{1}'")  # .format(top, nxt)
 			top = self.get_top_parse_stack()
 		# TODO  hess mikonam inja baiadd error bede
-		return (True, "Sequence matched successfully.")
+		return True
 
 	def _fill_parse_table(self):
 		for variable in self._variables:
@@ -167,10 +167,9 @@ class Parser:
 			for terminal in self._terminals:
 				if terminal in self._predicts[rule_id]:
 					if self._parse_table[variable][terminal] != Parser._INVALID:
-						print(False,
-							  "The grammar is not LL1. Variable: " + str(variable) + " Terminal: " + str(terminal))
-						return (
-							False, "The grammar is not LL1. Variable: " + str(variable) + " Terminal: " + str(terminal))
+						error_handler("Grammer Error",
+									  "The grammar is not LL1. Variable: " + str(variable) + " Terminal: " + str(
+										  terminal))
 					else:
 						self._parse_table[variable][terminal] = rule_id
 		return (True, "Parse table filled successfully.")
@@ -293,9 +292,9 @@ class Parser:
 		self._update_variables(rule_text_tokens)
 		self._update_terminals(rule_text_tokens)
 		if len(rule_text_tokens) < 3:
-			return (False, "Error in rule number " + str(idx))
+			error_handler("Grammer Error", "Error in rule number " + str(idx))
 		if not self.is_variable(rule_text_tokens[0]) or rule_text_tokens[1] != Parser._ARROW_STRING:
-			return (False, "Error in rule number " + str(idx))
+			error_handler("Grammer Error", "Error in rule number " + str(idx))
 		if len(rule_text_tokens) == 3 and rule_text_tokens[2] == Parser._NIL_STRING and rule_text_tokens[
 			0] not in self._nullable_variables:
 			self._nullable_variables.append(rule_text_tokens[0])
@@ -309,7 +308,6 @@ class Parser:
 			temp_list = self._variable_rules[key]
 		temp_list.append(rule_text_tokens)
 		self._variable_rules[key] = temp_list
-		return (True, "Grammar updated successfully.")
 
 	def _make_grammar_from_text(self, rules_text):
 		while True:
@@ -321,20 +319,18 @@ class Parser:
 				continue
 			if line[0] == Parser._RULE_COMMENT_CHARACTER:
 				continue
-			if not self._update_grammar(line)[0]:
-				return (False, "Error in making grammar")
-		return (True, "Grammar made successfully.")
+			self._update_grammar(line)
+		return
 
 	def run(self, rules_text):
 		self.clear()
-		if not self._make_grammar_from_text(rules_text)[0]:
-			return (False, "Error in making grammar")
+		self._make_grammar_from_text(rules_text)
 		self._find_all_nullable_variables()
 		self._find_all_firsts()
 		self._find_all_follows()
 		self._find_all_predicts()
 		if not self._fill_parse_table()[0]:
-			return (False, "Error in filling parse table")
+			error_handler("Grammer Error", "Error in filling parse table")
 		return (True, "Parser ran successfully.")
 
 	def get_firsts(self):

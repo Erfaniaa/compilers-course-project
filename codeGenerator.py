@@ -1,3 +1,6 @@
+from utils import error_handler
+
+
 class FinalCode:
 	codes = []
 
@@ -69,10 +72,10 @@ class CodeGenerator:
 
 	def check_type(self, operand0, operand2, operand3):
 		if self.symbol_table.get_var_type(operand2) == "bool" or self.symbol_table.get_var_type(operand2) == "char":
-			return -1
+			error_handler("Syntax Error", "Types does not match")
 		if self.symbol_table.get_var_type(operand2) == self.symbol_table.get_var_type(operand3):
 			return self.symbol_table.get_var_type(operand2)
-		return -1
+		error_handler("Syntax Error", "Types does not match")
 
 	def update_code(self, code_number, operand_number, value):
 		self.finalCode.update_code(int(code_number), int(operand_number), value)
@@ -104,7 +107,7 @@ class CodeGenerator:
 		if not self.symbol_table.is_var_declared(name):
 			self.symbol_table.new_variable(name, var_type)
 		else:
-			return  # TODO error
+			error_handler("Syntax Error", "variable with name " + name + " has already declared ")
 
 	def c_desc_with_assign(self):
 		name = self.pop_from_semantic_stack()
@@ -115,7 +118,7 @@ class CodeGenerator:
 			code = ["mov", self.symbol_table.get_var_address(name), operand2]
 			self.add_code(code)
 		else:
-			return  # TODO error
+			error_handler("Syntax Error", "variable with name " + name + " has already declared ")
 
 	def c_desc_normal_array(self):
 		name = self.pop_from_semantic_stack()
@@ -123,7 +126,7 @@ class CodeGenerator:
 		if not self.symbol_table.is_var_declared(name):
 			self.symbol_table.new_array(name, var_type, self.get_next_token_value())
 		else:
-			return  # TODO error
+			error_handler("Syntax Error", "variable with name " + name + " has already declared ")
 
 	def c_desc_weird_array(self):
 		datas = []
@@ -135,7 +138,7 @@ class CodeGenerator:
 		if not self.symbol_table.is_var_declared(name):
 			self.symbol_table.new_array(name, var_type, len(datas))
 		else:
-			return  # TODO error
+			error_handler("Syntax Error", "variable with name " + name + " has already declared ")
 		var = self.symbol_table.get_var(name)
 		type_size = var.type_size
 		address = var.address
@@ -151,8 +154,7 @@ class CodeGenerator:
 		operand1 = self.get_address_or_immediate_value(operand1_var)
 		code = []
 		right_code = []
-		if self.check_type(assignment_operator, operand1_var, operand3_var) < 0:
-			return -1  # TODO error
+		self.check_type(assignment_operator, operand1_var, operand3_var)
 		if assignment_operator == "=":
 			code.append("mov")
 			right_code.append(operand3)
@@ -259,7 +261,7 @@ class CodeGenerator:
 			code = ["mov", self.symbol_table.get_var_address(var_name), value]
 			self.add_code(code)
 		else:
-			return  # TODO error
+			error_handler("Syntax Error", "variable with name " + name + " has already declared ")
 
 	def id_inc_dec(self):
 		operand = self.pop_from_semantic_stack()
@@ -323,9 +325,6 @@ class CodeGenerator:
 		operand2 = self.get_address_or_immediate_value(oper2_var)
 		operand3 = self.get_address_or_immediate_value(oper3_var)
 		temp_var_type = self.check_type(operand0, oper2_var, oper3_var)
-		if temp_var_type < 0:
-			# TODO Error
-			return
 		destination_temp = self.get_temp(temp_var_type)
 		operand1 = self.get_address_or_immediate_value(destination_temp)
 		code = [operand0, operand1, operand2, operand3]
@@ -337,8 +336,7 @@ class CodeGenerator:
 		array_name = self.pop_from_semantic_stack()
 		array = self.symbol_table.get_var(array_name)
 		if array.type_of_data != "array":
-			# TODO array
-			return
+			error_handler("Syntax Error", array_name + " is not array")
 		array_start = array.address
 		array_type_size = array.type_size
 		temp1_address = self.get_address_or_immediate_value(self.get_temp(4))

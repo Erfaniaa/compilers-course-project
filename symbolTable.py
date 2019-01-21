@@ -1,3 +1,6 @@
+from utils import error_handler
+
+
 class Symbol:
 
 	def __init__(self, var_name, type_of_var, type_of_data, function_name, scope, type_size, size, address):
@@ -113,6 +116,9 @@ class SymbolTable:
 			for symbol in self.symbols:
 				if symbol.var_name == var_name and symbol.function == "Global":
 					var = symbol
+					best_symbol_address = symbol.address
+		if best_symbol_address == -1:
+			error_handler("Syntax Error", var_name + " is not declared")
 		return var
 
 	def get_var_address(self, var_name):
