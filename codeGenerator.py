@@ -32,6 +32,7 @@ class CodeGenerator:
 	next_token = "-1"
 	_WILL_BE_SET_LATER = "%"
 	_START_OF_LOOP_CHAR = "^"
+	_START_OF_IF = "#"
 
 	def __init__(self, parser, symbol_table):
 		self.symbol_table = symbol_table
@@ -54,6 +55,9 @@ class CodeGenerator:
 
 	def add_rule(self, rule):
 		self.finalCode.add_rule(rule)
+
+	def check_type(self, operand0, operand1, operan2):
+		return True
 
 	def update_rule(self, rule_number, operand_number, value):
 		self.finalCode.update_rule(int(rule_number), int(operand_number), value)
@@ -113,7 +117,7 @@ class CodeGenerator:
 		type_size = var.type_size
 		address = var.address
 		for data in reversed(datas):
-			self.add_rule(["mov", str(address), "#" + data])
+			self.add_rule(["mov", str(address), self.get_address_or_immediate_value(data)])
 			address += int(type_size)
 
 	def complete_assignment(self):
@@ -143,7 +147,7 @@ class CodeGenerator:
 		return
 
 	def push_start_of_if(self):
-		self.semantic_stack.append("#")
+		self.semantic_stack.append(self._START_OF_IF)
 
 	def start_of_if(self):
 		condition_result = self.get_address_or_immediate_value(self.pop_from_semantic_stack())
@@ -189,7 +193,7 @@ class CodeGenerator:
 
 	def end_of_all_if(self):
 		pc = self.get_pc()
-		while str(self.get_top_semantic_stack()) != "#":
+		while str(self.get_top_semantic_stack()) != self._START_OF_IF:
 			temp = int(self.pop_from_semantic_stack())
 			self.update_rule(temp, 1, pc)
 		self.pop_from_semantic_stack()
@@ -267,6 +271,24 @@ class CodeGenerator:
 	def push_break(self):
 		self.loop_breaks.append(self.get_pc())
 		self.add_rule(["jmp", self._WILL_BE_SET_LATER])
+
+	def mult_expression(self):
+		return
+
+	def divide_expression(self):
+		return
+
+	def add_expression(self):
+		return
+
+	def add_expression(self):
+		return
+
+	def math_expression_for_all(self, operand0):
+		return
+
+	def array(self):
+		return
 
 	def push_continue(self):
 		self.loop_continues.append(self.get_pc())
