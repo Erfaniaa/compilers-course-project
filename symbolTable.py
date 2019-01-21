@@ -102,8 +102,6 @@ class SymbolTable:
 
 	def get_var_address(self, var_name):
 		var = self.get_var(var_name)
-		print(var)
-		print(var_name)
 		return var.address
 
 	def get_var_type_size(self, var_name):
@@ -113,6 +111,11 @@ class SymbolTable:
 	def get_var_size(self, var_name):
 		var = self.get_var(var_name)
 		return var.size
+
+	def is_array(self, name):
+		if self.get_var(name).type_of_data == "array":
+			return True
+		return False
 
 	def is_var_declared(self, var_name):
 		for symbol in self.symbols:

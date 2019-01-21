@@ -23,6 +23,7 @@ class FinalCode:
 
 class CodeGenerator:
 	semantic_stack = []
+	switch_stack = []
 	loop_continues_destination = []
 	loop_continues = []
 	loop_breaks = []
@@ -44,11 +45,16 @@ class CodeGenerator:
 	def get_address_or_immediate_value(self, value):
 		if value[0] == "_":
 			return value[1:]
+		if value[0] == "@":
+			return value[0] + value[2:]
 		try:
 			val = int(value)
 			return "#" + str(val)
 		except ValueError:
-			return self.symbol_table.get_var_address(value)
+			x = self.symbol_table.get_var(value)
+			if x.type_of_data == "array":
+				return "@" + str(x.address)
+			return str(x.address)
 
 	def push_to_semantic_stack(self, value):
 		self.semantic_stack.append(value)
@@ -124,10 +130,10 @@ class CodeGenerator:
 			address += int(type_size)
 
 	def complete_assignment(self):
-		self.finalCode.print_codes()
 		operand3 = self.get_address_or_immediate_value(self.pop_from_semantic_stack())
 		assignment_operator = str(self.pop_from_semantic_stack())
-		operand1 = self.get_address_or_immediate_value(self.pop_from_semantic_stack())
+		operand1_var = self.pop_from_semantic_stack()
+		operand1 = self.get_address_or_immediate_value(operand1_var)
 		code = []
 		right_code = []
 		if assignment_operator == "=":
@@ -309,9 +315,7 @@ class CodeGenerator:
 
 	def array(self):
 		index = self.get_address_or_immediate_value(self.pop_from_semantic_stack())
-		print("index = ", index)
 		array_name = self.pop_from_semantic_stack()
-		print("array_name = ", array_name)
 		array = self.symbol_table.get_var(array_name)
 		if array.type_of_data != "array":
 			# TODO array
@@ -325,7 +329,7 @@ class CodeGenerator:
 		code2 = ["add", temp2_address, array_start, temp1_address]
 		self.add_rule(code1)
 		self.add_rule(code2)
-		self.push_to_semantic_stack(temp2)
+		self.push_to_semantic_stack("@" + str(temp2))
 
 	def push_continue(self):
 		self.loop_continues.append(self.get_pc())
@@ -333,5 +337,5 @@ class CodeGenerator:
 
 	def generate_code(self, semantic_rule, next_token):
 		self.next_token = next_token
-		print("semantic rule = ", semantic_rule)
+		# print("semantic rule = ", semantic_rule)
 		getattr(self, semantic_rule[1:])()
