@@ -96,7 +96,8 @@ class Parser:
 		while top != self._END_OF_FILE_CHARACTER:
 			print("top = ", top)
 			print(self.parse_stack)
-			print(tokens[idx:	])
+			print(tokens[idx:])
+			print(tokens[idx])
 			print("next_token = ", tokens[idx].value)
 			loop_counter += 1
 			if top == self._NIL_STRING:
