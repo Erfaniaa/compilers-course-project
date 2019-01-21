@@ -1,6 +1,8 @@
 from utils import error_handler
 
 
+
+
 class FinalCode:
 	codes = []
 
@@ -25,6 +27,7 @@ class FinalCode:
 
 
 class CodeGenerator:
+	function_signatures = []
 	semantic_stack = []
 	switch_stack = []
 	loop_continues_destination = []
@@ -39,6 +42,7 @@ class CodeGenerator:
 	_HAVE_DEFAULT_CHAR = "~"
 	_START_OF_IF = "#"
 	_START_OF_SWITCH = "!"
+	_START_OF_FUNCTION = "&"
 
 	def __init__(self, parser, symbol_table):
 		self.symbol_table = symbol_table
@@ -261,7 +265,7 @@ class CodeGenerator:
 			code = ["mov", self.symbol_table.get_var_address(var_name), value]
 			self.add_code(code)
 		else:
-			error_handler("Syntax Error", "variable with name " + name + " has already declared ")
+			error_handler("Syntax Error", "variable with name " + var_name + " has already declared ")
 
 	def id_inc_dec(self):
 		operand = self.pop_from_semantic_stack()
@@ -389,6 +393,24 @@ class CodeGenerator:
 		while self.loop_breaks[-1] != self._START_OF_LOOP_CHAR:
 			self.update_code(self.loop_breaks.pop(), 1, end_pc)
 		self.loop_breaks.pop()
+
+	def jump_to_main(self):
+		code = ["jmp", self._WILL_BE_SET_LATER]
+		self.finalCode.add_code(code)
+
+	def start_of_function(self):
+		self.push_to_semantic_stack(self._START_OF_FUNCTION)
+
+	def function_declaration(self):
+		pushed = []
+		while self.get_top_semantic_stack() != self._START_OF_FUNCTION:
+			pushed.append(self.pop_from_semantic_stack())
+		self.pop_from_semantic_stack()
+		if len(pushed) == 2 and pushed[1] == "void" and pushed[0] == "main":
+			self.update_code(0, 1, self.get_pc())
+		function_return_type =pushed.pop()
+		function_name =pushed.pop()
+
 
 	def generate_code(self, semantic_code, next_token):
 		self.next_token = next_token
