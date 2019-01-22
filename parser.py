@@ -158,7 +158,7 @@ class Parser:
 			except KeyError:
 				error_handler("Syntax Error", "6: Unable to find derivation of '{0}' on '{1}'")  # .format(top, nxt)
 			top = self.get_top_parse_stack()
-			# TODO  hess mikonam inja baiadd error bede
+		# TODO  hess mikonam inja baiadd error bede
 		return True
 
 	def _fill_parse_table(self):
