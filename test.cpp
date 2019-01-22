@@ -1,17 +1,14 @@
-int b=4;
-
-function void main2();
-
-
-
-
 function void main(){
-    int x;
-    ++x;
-    call main2();
-}
-function void main2(){
-    int a=4;
+    int x,z;
+    switch (x){
+        case 1:
+            ++x;
+        break;
+        case 2:
+            ++z;
+        default :
+            ++x;
+    }
 }
 
 

@@ -381,7 +381,6 @@ class CodeGenerator:
 
 	def complete_switch(self):
 		default_pc = -1
-		here_start_pc = self.get_pc()
 		if self.get_top_semantic_stack() == self._HAVE_DEFAULT_CHAR:
 			self.pop_from_semantic_stack()
 			default_pc = self.pop_from_semantic_stack()
@@ -391,6 +390,10 @@ class CodeGenerator:
 		self.pop_from_semantic_stack()
 		var = self.pop_from_semantic_stack()
 		start_pc = self.pop_from_semantic_stack()
+		jump_out_pc = self.get_pc()
+		code = ["jmp", self._WILL_BE_SET_LATER]
+		self.add_code(code)
+		here_start_pc = self.get_pc()
 		for case in reversed(jeq):
 			equal_value = self.get_address_or_immediate_value(case[0])
 			code = ["jeq", self.get_address_or_immediate_value(var), equal_value, case[1]]
@@ -403,6 +406,7 @@ class CodeGenerator:
 		while self.loop_breaks[-1] != self._START_OF_LOOP_CHAR:
 			self.update_code(self.loop_breaks.pop(), 1, end_pc)
 		self.loop_breaks.pop()
+		self.update_code(jump_out_pc, 1, end_pc)
 
 	def jump_to_main(self):
 		code = ["jmp", self._WILL_BE_SET_LATER]
