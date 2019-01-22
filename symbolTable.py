@@ -6,12 +6,13 @@ class Symbol:
 	def __init__(self, var_name, type_of_var, type_of_data, function_name, scope, type_size, size, address):
 		self.var_name = var_name
 		self.type_of_var = type_of_var  # int char float bool
-		self.type_of_data = type_of_data  # array temp_var var
+		self.type_of_data = type_of_data  # array temp var
 		self.function = function_name  # global  or function name
 		self.scope = scope  # scope number
 		self.type_size = type_size  # size of it var
 		self.size = size  # size taken
 		self.address = address  # address
+		self.released = True
 
 
 class SymbolTable:
@@ -19,7 +20,7 @@ class SymbolTable:
 	scope = 0
 	bitmap = []  # 1 is empty  0 is full
 	symbols = []
-	symbols_size = {"int": 4, "char": 2, "double": 8, "bool": 1}
+	symbols_size = {"void": 0, "int": 4, "char": 2, "double": 8, "bool": 1}
 
 	def get_size(self, type_of_var):
 		if type_of_var in self.symbols_size:
@@ -73,6 +74,7 @@ class SymbolTable:
 		# print("Temp ", name, " of type ", type_of_var, " placed in ", address, " with size ", size)
 		self.symbols.append(temp)
 		self.make_full_bitmap(address, size)
+		return name
 
 	def new_array(self, name, type_of_var, array_size):
 		type_size = self.get_size(type_of_var)
@@ -107,6 +109,15 @@ class SymbolTable:
 		self.scope -= 1
 		if self.scope == 0:
 			self.function = "Global"
+
+	def get_all_var_size(self):
+		count = 0
+		objs = []
+		for var in self.symbols:
+			if var.function == self.function:
+				count += var.size
+				objs.append([var.address, var.size, var.type_size])
+		return count, objs
 
 	def get_var(self, var_name):
 		best_var_scope = - 1

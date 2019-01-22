@@ -319,20 +319,16 @@ class CodeGenerator:
 		self.add_code(["jmp", self._WILL_BE_SET_LATER])
 
 	def mult_expression(self):
-		operand0 = "mult"
-		self.math_expression_for_all(operand0)
+		self.math_expression_for_all("mult")
 
 	def divide_expression(self):
-		operand0 = "div"
-		self.math_expression_for_all(operand0)
+		self.math_expression_for_all("div")
 
 	def add_expression(self):
-		operand0 = "add"
-		self.math_expression_for_all(operand0)
+		self.math_expression_for_all("add")
 
 	def sub_expression(self):
-		operand0 = "sub"
-		self.math_expression_for_all(operand0)
+		self.math_expression_for_all("sub")
 
 	def math_expression_for_all(self, operand0):
 		oper2_var = self.pop_from_semantic_stack()
@@ -571,6 +567,40 @@ class CodeGenerator:
 			if found:
 				break
 			func_id += 1
+
+		return_address_size = 4
+		return_value_size = self.symbol_table.get_size(self.function_signatures[func_id]['function_return_type'])
+		var_size = self.symbol_table.get_all_var_size()
+		variables = var_size[1]
+		pop_code = []
+		for var in variables:
+			address = var[0]
+			now_address = address
+			while now_address < (address + var[1]):
+				code = ["push", now_address]  # , "-", str(now_address + var[2])
+				pop_code.append(["pop", now_address])  # , "-", str(now_address + var[2])
+				self.add_code(code)
+				now_address += var[2]
+		code=["push",]
+
+
+
+
+
+
+
+
+
+		pop_code = reversed(pop_code)
+		for pop in pop_code:
+			self.add_code(pop)
+		var_size = var_size
+
+	# print(return_address_size, return_value_size, var_size)
+
+	# return address 4
+	# return value  =get signature return type  1 2 4 8
+	# temp_size
 
 	# TODO know func_id des_id start_point and sign matched
 
