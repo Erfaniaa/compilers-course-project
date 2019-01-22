@@ -1,12 +1,13 @@
 import copy
 import re
 
+from boolean_expression_parser import BooleanExpressionParser
 from codeGenerator import CodeGenerator
 from codeGenerator import FinalCode
 from scanner import TokenType, Token
 from symbolTable import SymbolTable
 from utils import add_element_to_set, add_list_of_elements_to_set, error_handler
-from boolean_expression_parser import BooleanExpressionParser
+
 
 class Parser:
 	_ARROW_STRING = "->"
@@ -163,6 +164,7 @@ class Parser:
 				# 	last_idx = idx
 				# 	idx += 1
 				# 	continue
+
 			last_idx = idx
 			top = self._get_parse_stack_top()
 			# # print("here here")
