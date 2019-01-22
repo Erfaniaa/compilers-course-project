@@ -1,20 +1,7 @@
-function void main2(int x){
-
-}
-
-function void main2(double x);
-
 function void main(){
-    int x[2],y,z;
-    bool zz;
-    double w;
-    x=y*z+x;
-    x=y*z;
-    call main2(y);
+	int a;
+	int b;
+	if ( (10 * a) < (10 - b) and (5 * a >= b) or (3 * (5 + 8) < (b + a) )  ) {
+		++a;
+	}
 }
-function void main2(double x){
-
-}
-
-
-

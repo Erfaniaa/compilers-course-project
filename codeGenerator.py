@@ -60,6 +60,7 @@ class CodeGenerator:
 		return self.symbol_table.new_temp(size)
 
 	def get_address_or_immediate_value(self, value):
+		value = str(value)
 		if value[0] == "_":
 			return value[1:]
 		if value[0] == "@":
@@ -83,7 +84,13 @@ class CodeGenerator:
 		self.finalCode.add_code(code)
 
 	def check_type(self, operand0, operand2, operand3):
-		if self.symbol_table.get_var_type(operand2) == "bool" or self.symbol_table.get_var_type(operand2) == "char":
+		if self.symbol_table.get_var_type(operand2) == "double" and self.symbol_table.get_var_type(operand3) == "double":
+			return "double"
+		if self.symbol_table.get_var_type(operand2) == "int" and self.symbol_table.get_var_type(operand3) == "int":
+			return "int"
+		if self.symbol_table.get_var_type(operand2) == "bool" and self.symbol_table.get_var_type(operand3) == "bool":
+			return "bool"
+		if self.symbol_table.get_var_type(operand2) == "bool" and self.symbol_table.get_var_type(operand3) == "char":
 			error_handler("Syntax Error", "Types does not match")
 		if self.symbol_table.get_var_type(operand2) == self.symbol_table.get_var_type(operand3):
 			return self.symbol_table.get_var_type(operand2)

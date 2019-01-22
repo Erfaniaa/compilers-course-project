@@ -120,7 +120,7 @@ class SymbolTable:
 		return count, objs
 
 	def get_var(self, var_name):
-		best_var_scope = - 1
+		best_var_scope = -1
 		best_symbol_address = -1
 		var = {}
 		for symbol in self.symbols:
@@ -134,7 +134,7 @@ class SymbolTable:
 					var = symbol
 					best_symbol_address = symbol.address
 		if best_symbol_address == -1:
-			error_handler("Syntax Error", var_name + " is not declared")
+			error_handler("Syntax Error", str(var_name) + " is not declared")
 		return var
 
 	def get_var_address(self, var_name):
@@ -150,8 +150,12 @@ class SymbolTable:
 		return var.size
 
 	def get_var_type(self, var_name):
-		var = self.get_var(var_name)
-		return var.type_of_var
+		try:
+			int(var_name)
+			return "int"
+		except ValueError:
+			var = self.get_var(var_name)
+			return var.type_of_var
 
 	def is_array(self, name):
 		if self.get_var(name).type_of_data == "array":

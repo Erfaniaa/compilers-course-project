@@ -17,5 +17,6 @@ def add_list_of_elements_to_set(cur_set, list_of_elements):
 
 
 def error_handler(type_of_error, error_massage):
+	# int("x")
 	print(type_of_error, error_massage)
 	sys.exit()
