@@ -80,7 +80,7 @@ class Parser:
 	def _is_nullable_variable(self, variable):
 		return variable in self._nullable_variables
 
-	def ـget_parse_stack_top(self):
+	def _get_parse_stack_top(self):
 		while self.parse_stack[-1] == self._NIL_STRING:
 			self.parse_stack.pop()
 		return self.parse_stack[-1]
@@ -132,12 +132,12 @@ class Parser:
 				continue
 			last_idx = idx
 			if top == self._NIL_STRING:
-				top = self.ـget_parse_stack_top()
+				top = self._get_parse_stack_top()
 				continue
 			if self.is_semantic_rule(top) and not use_boolean_expression_parser:					
 				semantic = top
 				self.parse_stack.pop()
-				top = self.ـget_parse_stack_top()
+				top = self._get_parse_stack_top()
 				code_generator.generate_code(semantic, tokens[idx])
 				continue
 			if loop_counter > len(tokens) * 20:
@@ -146,7 +146,7 @@ class Parser:
 				if tokens[idx].type == TokenType.identifier:
 					idx = idx + 1
 					self.parse_stack.pop()
-					top = self.ـget_parse_stack_top()
+					top = self._get_parse_stack_top()
 					continue
 				else:
 					error_handler("Syntax Error", " (2) next token should not be " + str(tokens[idx]))
@@ -154,7 +154,7 @@ class Parser:
 				if tokens[idx].type == TokenType.number:
 					idx = idx + 1
 					self.parse_stack.pop()
-					top = self.ـget_parse_stack_top()
+					top = self._get_parse_stack_top()
 					continue
 				else:
 					error_handler("Syntax Error", " (3) next token should not be " + str(tokens[idx]))
@@ -166,7 +166,7 @@ class Parser:
 				if tokens[idx].value == top:
 					idx = idx + 1
 					self.parse_stack.pop()
-					top = self.ـget_parse_stack_top()
+					top = self._get_parse_stack_top()
 					continue
 				else:
 					error_handler("Syntax Error", " (4) next token should not be " + str(tokens[idx]))
@@ -186,7 +186,7 @@ class Parser:
 					error_handler("Syntax Error", " (5)")
 			except KeyError:
 				error_handler("Syntax Error", "6: Unable to find derivation of '{0}' on '{1}'")  # .format(top, nxt)
-			top = self.ـget_parse_stack_top()
+			top = self._get_parse_stack_top()
 			# TODO  hess mikonam inja baiadd error bede
 		return True
 
