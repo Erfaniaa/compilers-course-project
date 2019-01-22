@@ -1,12 +1,13 @@
 import copy
 import re
 
+from boolean_expression_parser import BooleanExpressionParser
 from codeGenerator import CodeGenerator
 from codeGenerator import FinalCode
 from scanner import TokenType, Token
 from symbolTable import SymbolTable
 from utils import add_element_to_set, add_list_of_elements_to_set, error_handler
-from boolean_expression_parser import BooleanExpressionParser
+
 
 class Parser:
 	_ARROW_STRING = "->"
@@ -101,35 +102,36 @@ class Parser:
 		boolean_expression_tokens = []
 		while top != self._END_OF_FILE_CHARACTER:
 			print("-----------")
-			# print("top = ", top)
+			print("top = ", top)
+			print("next_token = ", tokens[idx].value)
 			# print(self.parse_stack)
 			# print(tokens[idx:])
 			# print(tokens[idx])
-			print("next_token = ", tokens[idx].value)
 			print(open_parentheses_count)
 			print(use_boolean_expression_parser)
 			print(str(idx) + " " + str(last_idx))
 			loop_counter += 1
 			last_token = tokens[-2]
-			if top == "BOOLEAN_EXPRESSION" and open_parentheses_count == 1:
-				self.parse_stack.pop()
-				use_boolean_expression_parser = True
-			if idx != last_idx and tokens[idx].value == "(":
-				open_parentheses_count += 1
-			if idx != last_idx and tokens[idx].value == ")":
-				open_parentheses_count -= 1
-				if open_parentheses_count == 0 and use_boolean_expression_parser:
-					print("**********")
-					print(boolean_expression_tokens)
-					print("**********")
-					boolean_expression_parser.parse(boolean_expression_tokens)
-					boolean_expression_tokens = []
-					use_boolean_expression_parser = False
-			if use_boolean_expression_parser and idx != last_idx:
-				boolean_expression_tokens.append(tokens[idx])
-				last_idx = idx
-				idx += 1
-				continue
+			if False:
+				if top == "BOOLEAN_EXPRESSION" and open_parentheses_count == 1:
+					self.parse_stack.pop()
+					use_boolean_expression_parser = True
+				if idx != last_idx and tokens[idx].value == "(":
+					open_parentheses_count += 1
+				if idx != last_idx and tokens[idx].value == ")":
+					open_parentheses_count -= 1
+					if open_parentheses_count == 0 and use_boolean_expression_parser:
+						print("**********")
+						print(boolean_expression_tokens)
+						print("**********")
+						boolean_expression_parser.parse(boolean_expression_tokens)
+						boolean_expression_tokens = []
+						use_boolean_expression_parser = False
+				if use_boolean_expression_parser and idx != last_idx:
+					boolean_expression_tokens.append(tokens[idx])
+					last_idx = idx
+					idx += 1
+					continue
 			last_idx = idx
 			if top == self._NIL_STRING:
 				top = self._get_parse_stack_top()

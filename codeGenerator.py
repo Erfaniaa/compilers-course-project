@@ -581,20 +581,22 @@ class CodeGenerator:
 				pop_code.append(["pop", now_address])  # , "-", str(now_address + var[2])
 				self.add_code(code)
 				now_address += var[2]
-		code=["push",]
-
-
-
-
-
-
-
-
-
+		code = ["push", self.get_pc() + 2]
+		self.add_code(code)
+		code = ["jmp", start_point_of_jump]
+		if start_point_of_jump == self._WILL_BE_SET_LATER:
+			self.function_call_jmp_that_do_not_have_pc.append(
+				{int(self.get_pc()), func_id, sign_id})
+		self.add_code(code)
+		if return_value_size > 0:
+			print(self.function_signatures[func_id]['function_return_type'])
+			temp = self.symbol_table.new_temp(self.function_signatures[func_id]['function_return_type'])
+			code = ["pop", self.get_address_or_immediate_value(temp)]
+			self.add_code(code)
+			self.push_to_semantic_stack(temp)
 		pop_code = reversed(pop_code)
 		for pop in pop_code:
 			self.add_code(pop)
-		var_size = var_size
 
 	# print(return_address_size, return_value_size, var_size)
 

@@ -1,19 +1,12 @@
-function void main2(int x){
-
+function int main2(int x){
+    int x=3;
 }
-
-function void main2(double x);
-
+function void main3(int x){
+    int x=3;
+}
 function void main(){
-    int x[2],y,z;
-    bool zz;
-    double w;
-    x=y*z+x;
-    x=y*z;
-    call main2(y);
-}
-function void main2(double x){
-
+    int x;
+    call main3(x);
 }
 
 
