@@ -19,7 +19,7 @@ class SymbolTable:
 	scope = 0
 	bitmap = []  # 1 is empty  0 is full
 	symbols = []
-	symbols_size = {"int": 4, "char": 2, "float": 8, "bool": 1}
+	symbols_size = {"int": 4, "char": 2, "double": 8, "bool": 1}
 
 	def get_size(self, type_of_var):
 		if type_of_var in self.symbols_size:

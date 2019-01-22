@@ -95,6 +95,7 @@ class Parser:
 		top = self._start_variable
 		loop_counter = 0
 		while top != self._END_OF_FILE_CHARACTER:
+			# print("-----------")
 			# print("top = ", top)
 			# print(self.parse_stack)
 			# print(tokens[idx:])
@@ -157,7 +158,7 @@ class Parser:
 			except KeyError:
 				error_handler("Syntax Error", "6: Unable to find derivation of '{0}' on '{1}'")  # .format(top, nxt)
 			top = self.get_top_parse_stack()
-		# TODO  hess mikonam inja baiadd error bede
+			# TODO  hess mikonam inja baiadd error bede
 		return True
 
 	def _fill_parse_table(self):
@@ -170,6 +171,12 @@ class Parser:
 			for terminal in self._terminals:
 				if terminal in self._predicts[rule_id]:
 					if self._parse_table[variable][terminal] != Parser._INVALID:
+						# print(terminal)
+						# print(variable)
+						# print(rule_id)
+						# print(self._rules[rule_id])
+						# print(self._rules[self._parse_table[variable][terminal]])
+						# print(self._is_nullable_variable('NOT_VOID_FUNCTION_STATEMENT'))
 						error_handler("Grammer Error",
 									  "The grammar is not LL1. Variable: " + str(variable) + " Terminal: " + str(
 										  terminal))
