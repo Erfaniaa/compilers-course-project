@@ -1,6 +1,7 @@
 function void main2(int x){
 
 }
+
 function void main2(double x);
 
 function void main(){
