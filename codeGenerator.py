@@ -102,7 +102,7 @@ class CodeGenerator:
 		return self.pop()
 
 	def get_type(self, var):
-		return
+		return self.symbol_table.get_var_type(var)
 
 	def push(self):
 		return self.semantic_stack.append(self.get_next_token_value())
@@ -545,16 +545,19 @@ class CodeGenerator:
 		start_point_of_jump = -1
 		for function_dec in self.function_signatures:
 			found = False
+			got_in = False
 			if function_dec["function_name"] != function_name:
 				func_id += 1
 				continue
 			sign_id = 0
+			got_in = True
 			for signature in function_dec["signatures"]:
 				is_same = True
 				if len(signature['var_types']) != len(pushed):
+					sign_id += 1
 					continue
 				for i in range(0, len(pushed)):
-					if signature['var_types'][i] != self.get_Type(pushed[i]):
+					if signature['var_types'][i] != self.get_type(pushed[i]):
 						is_same = False
 						break
 					i += 1
@@ -563,11 +566,13 @@ class CodeGenerator:
 					start_point_of_jump = signature["start_point"]
 					break
 				sign_id += 1
+			if got_in and not found:
+				error_handler("Syntax error", "no function with this name and signature")
 			if found:
 				break
 			func_id += 1
 
-	# TODO knwo fucn id des_id start_point and sign matched
+	# TODO know func_id des_id start_point and sign matched
 
 	def return_not_void(self):
 		return

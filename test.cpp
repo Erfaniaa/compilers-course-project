@@ -1,14 +1,16 @@
+function void main2(int x){
+
+}
+function void main2(double x);
+
 function void main(){
-    int x,z;
-    switch (x){
-        case 1:
-            ++x;
-        break;
-        case 2:
-            ++z;
-        default :
-            ++x;
-    }
+    int y,z;
+    double w;
+
+    call main2(w);
+}
+function void main2(double x){
+
 }
 
 
