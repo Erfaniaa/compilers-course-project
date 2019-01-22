@@ -6,7 +6,7 @@ from codeGenerator import FinalCode
 from scanner import TokenType, Token
 from symbolTable import SymbolTable
 from utils import add_element_to_set, add_list_of_elements_to_set, error_handler
-
+from boolean_expression_parser import BooleanExpressionParser
 
 class Parser:
 	_ARROW_STRING = "->"
@@ -80,35 +80,64 @@ class Parser:
 	def _is_nullable_variable(self, variable):
 		return variable in self._nullable_variables
 
-	def get_top_parse_stack(self):
+	def ـget_parse_stack_top(self):
 		while self.parse_stack[-1] == self._NIL_STRING:
 			self.parse_stack.pop()
 		return self.parse_stack[-1]
 
 	def match(self, tokens):
 		code_generator = CodeGenerator(self, self.symbol_table)
+		boolean_expression_parser = BooleanExpressionParser(code_generator)
 		tokens.append(Token('eof', 'keyword'))
 		tokens.append(self._END_OF_FILE_CHARACTER)
+		last_idx = -1
 		idx = 0
 		self.parse_stack.append(self._END_OF_FILE_CHARACTER)
 		self.parse_stack.append(self._start_variable)
 		top = self._start_variable
 		loop_counter = 0
+		open_parentheses_count = 0
+		use_boolean_expression_parser = False
+		boolean_expression_tokens = []
 		while top != self._END_OF_FILE_CHARACTER:
-			# print("-----------")
+			print("-----------")
 			# print("top = ", top)
 			# print(self.parse_stack)
 			# print(tokens[idx:])
 			# print(tokens[idx])
-			# print("next_token = ", tokens[idx].value)
+			print("next_token = ", tokens[idx].value)
+			print(open_parentheses_count)
+			print(use_boolean_expression_parser)
+			print(str(idx) + " " + str(last_idx))
 			loop_counter += 1
-			if top == self._NIL_STRING:
-				top = self.get_top_parse_stack()
+			last_token = tokens[-2]
+			if top == "BOOLEAN_EXPRESSION" and open_parentheses_count == 1:
+				self.parse_stack.pop()
+				use_boolean_expression_parser = True
+			if idx != last_idx and tokens[idx].value == "(":
+				open_parentheses_count += 1
+			if idx != last_idx and tokens[idx].value == ")":
+				open_parentheses_count -= 1
+				if open_parentheses_count == 0 and use_boolean_expression_parser:
+					print("**********")
+					print(boolean_expression_tokens)
+					print("**********")
+					boolean_expression_parser.parse(boolean_expression_tokens)
+					boolean_expression_tokens = []
+					use_boolean_expression_parser = False
+			if use_boolean_expression_parser and idx != last_idx:
+				boolean_expression_tokens.append(tokens[idx])
+				last_idx = idx
+				idx += 1
 				continue
-			if self.is_semantic_rule(top):
+			last_idx = idx
+			if top == self._NIL_STRING:
+				top = self.ـget_parse_stack_top()
+				continue
+			if self.is_semantic_rule(top) and not use_boolean_expression_parser:
 				semantic = top
 				self.parse_stack.pop()
-				top = self.get_top_parse_stack()
+				top = self.ـget_parse_stack_top()
 				code_generator.generate_code(semantic, tokens[idx])
 				continue
 			if loop_counter > len(tokens) * 20:
@@ -117,7 +146,7 @@ class Parser:
 				if tokens[idx].type == TokenType.identifier:
 					idx = idx + 1
 					self.parse_stack.pop()
-					top = self.get_top_parse_stack()
+					top = self.ـget_parse_stack_top()
 					continue
 				else:
 					error_handler("Syntax Error", " (2) next token should not be " + str(tokens[idx]))
@@ -125,7 +154,7 @@ class Parser:
 				if tokens[idx].type == TokenType.number:
 					idx = idx + 1
 					self.parse_stack.pop()
-					top = self.get_top_parse_stack()
+					top = self.ـget_parse_stack_top()
 					continue
 				else:
 					error_handler("Syntax Error", " (3) next token should not be " + str(tokens[idx]))
@@ -137,7 +166,7 @@ class Parser:
 				if tokens[idx].value == top:
 					idx = idx + 1
 					self.parse_stack.pop()
-					top = self.get_top_parse_stack()
+					top = self.ـget_parse_stack_top()
 					continue
 				else:
 					error_handler("Syntax Error", " (4) next token should not be " + str(tokens[idx]))
@@ -157,8 +186,8 @@ class Parser:
 					error_handler("Syntax Error", " (5)")
 			except KeyError:
 				error_handler("Syntax Error", "6: Unable to find derivation of '{0}' on '{1}'")  # .format(top, nxt)
-			top = self.get_top_parse_stack()
-		# TODO  hess mikonam inja baiadd error bede
+			top = self.ـget_parse_stack_top()
+			# TODO  hess mikonam inja baiadd error bede
 		return True
 
 	def _fill_parse_table(self):
