@@ -38,7 +38,7 @@ class Token:
 
 
 KEYWORDS = ['bool', 'switch', 'case', 'if', 'default', 'while', 'do', 'for', 'return', 'int', 'float', 'double',
-			'char', 'start', 'else', 'break', 'continue', 'and', 'or', 'not', 'function', 'eof', 'void']
+			'char', 'call', 'start', 'else', 'break', 'continue', 'and', 'or', 'not', 'function', 'eof', 'void']
 TRANSITIONS = [
 	Transition('new_token', 'parentheses', r'[\(\)]'),
 	Transition('new_token', 'colon', r'\:'),

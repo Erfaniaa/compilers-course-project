@@ -1,14 +1,17 @@
 int b=4;
-function void main() {
-    int a,b=2,c,d;
-    bool e;
+
+function void main2();
+
+
+
+
+function void main(){
+    int x;
+    ++x;
+}
+function void main2(){
+    int a=4;
 }
 
-function void an(int x){
-    int y;
-}
 
-function void main2(int x) {
-    int a,b=2,c,d;
-    bool e;
-}
+

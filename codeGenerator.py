@@ -3,6 +3,7 @@ from utils import error_handler
 
 class FinalCode:
 	codes = []
+	_WILL_BE_SET_LATER = "%"
 
 	def update_code(self, code_number, operand_number, value):
 		self.codes[code_number][operand_number] = value
@@ -12,6 +13,11 @@ class FinalCode:
 
 	def get_pc(self):
 		return len(self.codes)
+
+	def have_main(self):
+		if self.codes[0][1] == self._WILL_BE_SET_LATER:
+			return False
+		return True
 
 	def print_codes(self):
 		idx = 0
@@ -36,6 +42,7 @@ class CodeGenerator:
 	symbol_table = {}
 	finalCode = FinalCode()
 	parser = {}
+	function_call_jmp_that_do_not_have_pc = []  # { address,shomare function , shomare signatures }
 	next_token = "-1"
 	_WILL_BE_SET_LATER = "%"
 	_START_OF_LOOP_CHAR = "^"
@@ -43,6 +50,7 @@ class CodeGenerator:
 	_START_OF_IF = "#"
 	_START_OF_SWITCH = "!"
 	_START_OF_FUNCTION = "&"
+	_START_OF_FUNCTION_CALL = "*"
 
 	def __init__(self, parser, symbol_table):
 		self.symbol_table = symbol_table
@@ -92,6 +100,9 @@ class CodeGenerator:
 
 	def pop_from_semantic_stack(self):
 		return self.pop()
+
+	def get_type(self, var):
+		return
 
 	def push(self):
 		return self.semantic_stack.append(self.get_next_token_value())
@@ -389,7 +400,6 @@ class CodeGenerator:
 			code = ["jmp", default_pc]
 			self.add_code(code)
 		end_pc = self.get_pc()
-		print(start_pc)
 		while self.loop_breaks[-1] != self._START_OF_LOOP_CHAR:
 			self.update_code(self.loop_breaks.pop(), 1, end_pc)
 		self.loop_breaks.pop()
@@ -414,10 +424,72 @@ class CodeGenerator:
 		function_starting_point = self.get_pc()
 		function_variables_names = []
 		function_variables_types = []
-		found = False
 		while len(pushed) != 0:
 			function_variables_types.append(pushed.pop())
 			function_variables_names.append(pushed.pop())
+		state = 0
+		function_declaration = {}
+		signature_index = -1
+
+		for item in self.function_signatures:
+			if item['function_name'] != function_name:
+				continue
+			if item['function_name'] == "main":
+				error_handler("Syntax Error", "There is at least 2 main in your code")
+			if item['function_return_type'] != function_return_type:
+				error_handler("Syntax Error", " function " + function_name + "has declared with different return type ")
+			state = 1
+			function_declaration = item
+			index = 0
+			for signature in item['signatures']:
+				is_same = True
+				if len(signature['var_types']) != len(function_variables_types):
+					index += 1
+					continue
+				for i in range(0, len(function_variables_types)):
+					if signature['var_types'][i] != function_variables_types[i]:
+						is_same = False
+						break
+				if is_same:
+					if signature['start_point'] != self._WILL_BE_SET_LATER:
+						error_handler("Syntax Error",
+									  " function " + function_name + " has declared with same signature")
+					else:
+						state = 2
+						signature_index = index
+						break
+
+				index += 1
+
+			break
+		obj = {"var_types": function_variables_types, "var_names": function_variables_names,
+			   "start_point": function_starting_point}
+		if state == 0:
+			function_declaration['function_return_type'] = function_return_type
+			function_declaration['function_name'] = function_name
+			function_declaration['signatures'] = [obj]
+			self.function_signatures.append(function_declaration)
+		elif state == 1:
+			function_declaration['signatures'].append(obj)
+		elif state == 2:
+			function_declaration['signatures'][signature_index] = obj
+
+	def signature_function_declaration(self):
+		pushed = []
+		while self.get_top_semantic_stack() != self._START_OF_FUNCTION:
+			pushed.append(self.pop_from_semantic_stack())
+		self.pop_from_semantic_stack()
+		if len(pushed) == 2 and pushed[1] == "void" and pushed[0] == "main":
+			self.update_code(0, 1, self.get_pc())
+		function_return_type = pushed.pop()
+		function_name = pushed.pop()
+		self.symbol_table.set_function_name(function_name)
+		function_variables_names = []
+		function_variables_types = []
+		while len(pushed) != 0:
+			function_variables_types.append(pushed.pop())
+			function_variables_names.append(pushed.pop())
+		state = 0
 		function_declaration = {}
 		for item in self.function_signatures:
 			if item['function_name'] != function_name:
@@ -426,6 +498,8 @@ class CodeGenerator:
 				error_handler("Syntax Error", "There is at least 2 main in your code")
 			if item['function_return_type'] != function_return_type:
 				error_handler("Syntax Error", " function " + function_name + "has declared with different return type ")
+			state = 1
+			function_declaration = item
 			for signature in item['signatures']:
 				is_same = True
 				if len(signature['var_types']) != len(function_variables_types):
@@ -435,19 +509,79 @@ class CodeGenerator:
 						is_same = False
 						break
 				if is_same:
-					error_handler("Syntax Error", " function " + function_name + " has declared with same signature")
-			found = True
-			function_declaration = item
+					error_handler("Syntax Error",
+								  " function " + function_name + " has declared with same signature")
 			break
 		obj = {"var_types": function_variables_types, "var_names": function_variables_names,
-			   "start_point": function_starting_point}
-		if found:
-			function_declaration['signatures'].append(obj)
-		else:
+			   "start_point": self._WILL_BE_SET_LATER}
+		if state == 0:
 			function_declaration['function_return_type'] = function_return_type
 			function_declaration['function_name'] = function_name
 			function_declaration['signatures'] = [obj]
 			self.function_signatures.append(function_declaration)
+		elif state == 1:
+			function_declaration['signatures'].append(obj)
+
+	def jump_out_of_function(self):
+		return
+
+	def call_function(self):
+		self.push_to_semantic_stack(self._START_OF_FUNCTION_CALL)
+		return
+
+	def finish_function_call(self):
+		pushed = []
+		while self.get_top_semantic_stack() != self._START_OF_FUNCTION_CALL:
+			pushed.append(self.pop_from_semantic_stack())
+		self.pop_from_semantic_stack()
+		function_name = pushed.pop()
+		pushed = list(reversed(pushed))
+		func_id = 0
+		sign_id = 0
+		start_point_of_jump = -1
+		for function_dec in self.function_signatures:
+			found = False
+			if function_dec["function_name"] != function_name:
+				func_id += 1
+				continue
+			sign_id = 0
+			for signature in function_dec["signatures"]:
+				is_same = True
+				if len(signature['var_types']) != len(pushed):
+					continue
+				for i in range(0, len(pushed)):
+					if signature['var_types'][i] != self.get_Type(pushed[i]):
+						is_same = False
+						break
+					i += 1
+				if is_same:
+					found = True
+					start_point_of_jump = signature["start_point"]
+					break
+				sign_id += 1
+			if found:
+				break
+			func_id += 1
+
+	# TODO knwo fucn id des_id start_point and sign matched
+
+	def return_not_void(self):
+		return
+
+	def return_void(self):
+		return
+
+	def check_all_function_have_signature(self):
+		for item in self.function_signatures:
+			for signature in item['signatures']:
+				if signature['start_point'] == self._WILL_BE_SET_LATER:
+					error_handler("Syntax Error", " function " + item['function_name'] + " has not declared")
+		if not self.finalCode.have_main():
+			error_handler("Syntax Error", "There is not int main that have no input variable")
+
+		for item in self.function_call_jmp_that_do_not_have_pc:
+			self.finalCode.update_code(item[0], 1,
+									   self.function_signatures[item[1]]["signatures"][item[2]]['start_point'])
 
 	def generate_code(self, semantic_code, next_token):
 		self.next_token = next_token
