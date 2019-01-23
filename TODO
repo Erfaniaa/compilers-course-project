@@ -1,11 +1,11 @@
-#TODO read character
-#TODO cast char float to number  # True False
-#TODO function call
-#TODO match()
-#TODO for and assignment bottom-up parsing
-#TODO not, -3
-#TODO parse table
-#TODO try except for boolean parsing
-#TODO GUI
-#TODO save to file
-#TODO check types for +=
+#TODO #ERFAN read character
+#TODO #ERFAN cast char float to number  # True False
+#TODO #ERFAN match()
+#TODO #ERFAN for and assignment bottom-up parsing
+#TODO #ERFAN not, -3
+#TODO #ERFAN parse table
+#TODO #ERFAN try except for boolean parsing
+#TODO #ERFAN GUI
+#TODO #ERFAN save to file
+#TODO #ERFAN check types for +=
+#TODO #ALI change error for defining global variable after function define

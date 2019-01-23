@@ -31,8 +31,7 @@ class FinalCode:
 
 
 class CodeGenerator:
-	function_return_value = []
-	function_return_address = []
+	function_return_address = {}
 	function_signatures = []
 	semantic_stack = []
 	switch_stack = []
@@ -57,8 +56,8 @@ class CodeGenerator:
 		self.symbol_table = symbol_table
 		self.parser = parser
 
-	def get_temp(self, size):
-		return self.symbol_table.new_temp(size)
+	def get_temp(self, temp_type):
+		return self.symbol_table.new_temp(temp_type)
 
 	def get_address_or_immediate_value(self, value):
 		value = str(value)
@@ -85,7 +84,8 @@ class CodeGenerator:
 		self.finalCode.add_code(code)
 
 	def check_type(self, operand0, operand2, operand3):
-		if self.symbol_table.get_var_type(operand2) == "double" and self.symbol_table.get_var_type(operand3) == "double":
+		if self.symbol_table.get_var_type(operand2) == "double" and self.symbol_table.get_var_type(
+				operand3) == "double":
 			return "double"
 		if self.symbol_table.get_var_type(operand2) == "int" and self.symbol_table.get_var_type(operand3) == "int":
 			return "int"
@@ -351,8 +351,8 @@ class CodeGenerator:
 			error_handler("Syntax Error", array_name + " is not array")
 		array_start = array.address
 		array_type_size = array.type_size
-		temp1_address = self.get_address_or_immediate_value(self.get_temp(4))
-		temp2 = self.get_temp(4)
+		temp1_address = self.get_address_or_immediate_value(self.get_temp("int"))
+		temp2 = self.get_temp("int")
 		temp2_address = self.get_address_or_immediate_value(temp2)
 		code1 = ["mult", temp1_address, array_type_size, index]
 		code2 = ["add", temp2_address, array_start, temp1_address]
@@ -474,6 +474,24 @@ class CodeGenerator:
 			function_declaration['signatures'].append(obj)
 		elif state == 2:
 			function_declaration['signatures'][signature_index] = obj
+		self.function_called(obj)
+
+	def function_called(self, signature):
+		idx = len(signature["var_names"]) - 1
+		while idx >= 0:
+			var_name = signature["var_names"][idx]
+			var_type = signature["var_types"][idx]
+			if not self.symbol_table.is_var_declared(var_name):
+				self.symbol_table.new_variable(var_name, var_type)
+			else:
+				error_handler("Syntax Error", "variable with name " + var_name + " has already declared ")
+			code = ["pop", self.get_address_or_immediate_value(var_name)]
+			self.add_code(code)
+			idx -= 1
+		dest_temp = self.symbol_table.new_temp("int")
+		code = ["pop", self.get_address_or_immediate_value(dest_temp)]
+		self.add_code(code)
+		self.function_return_address = dest_temp
 
 	def signature_function_declaration(self):
 		pushed = []
@@ -523,12 +541,20 @@ class CodeGenerator:
 		elif state == 1:
 			function_declaration['signatures'].append(obj)
 
+	def jump_out_of_not_void_function(self):
+		self.add_code(["push", "#0"])
+		self.jump_out_of_function()
+
+	def jump_out_of_void_function(self):
+		self.return_void()
+
 	def jump_out_of_function(self):
+		code = ["jmp", self.get_address_or_immediate_value(self.function_return_address)]
+		self.add_code(code)
 		return
 
 	def call_function(self):
 		self.push_to_semantic_stack(self._START_OF_FUNCTION_CALL)
-		return
 
 	def finish_function_call(self):
 		pushed = []
@@ -540,14 +566,12 @@ class CodeGenerator:
 		func_id = 0
 		sign_id = 0
 		start_point_of_jump = -1
+		found = False
 		for function_dec in self.function_signatures:
-			found = False
-			got_in = False
 			if function_dec["function_name"] != function_name:
 				func_id += 1
 				continue
 			sign_id = 0
-			got_in = True
 			for signature in function_dec["signatures"]:
 				is_same = True
 				if len(signature['var_types']) != len(pushed):
@@ -563,13 +587,12 @@ class CodeGenerator:
 					start_point_of_jump = signature["start_point"]
 					break
 				sign_id += 1
-			if got_in and not found:
-				error_handler("Syntax error", "no function with this name and signature")
 			if found:
 				break
-			func_id += 1
-
-		return_address_size = 4
+			else:
+				error_handler("Syntax error", "no function with this name and signature")
+		if not found:
+			error_handler("Syntax error", "function is not declared")
 		return_value_size = self.symbol_table.get_size(self.function_signatures[func_id]['function_return_type'])
 		var_size = self.symbol_table.get_all_var_size()
 		variables = var_size[1]
@@ -582,12 +605,14 @@ class CodeGenerator:
 				pop_code.append(["pop", now_address])  # , "-", str(now_address + var[2])
 				self.add_code(code)
 				now_address += var[2]
-		code = ["push", self.get_pc() + 2]
+		code = ["push", "#" + str(self.get_pc() + 2 + len(pushed))]
 		self.add_code(code)
+		for push in pushed:
+			code = ["push", self.get_address_or_immediate_value(push)]
+			self.add_code(code)
 		code = ["jmp", start_point_of_jump]
 		if start_point_of_jump == self._WILL_BE_SET_LATER:
-			self.function_call_jmp_that_do_not_have_pc.append(
-				{int(self.get_pc()), func_id, sign_id})
+			self.function_call_jmp_that_do_not_have_pc.append([int(self.get_pc()), func_id, sign_id])
 		self.add_code(code)
 		if return_value_size > 0:
 			temp = self.symbol_table.new_temp(self.function_signatures[func_id]['function_return_type'])
@@ -598,12 +623,17 @@ class CodeGenerator:
 		for pop in pop_code:
 			self.add_code(pop)
 
-
 	def return_not_void(self):
-		return
+		return_value_address = self.get_address_or_immediate_value(self.get_next_token_value())
+		code = ["push", return_value_address]
+		self.add_code(code)
+		self.jump_out_of_function()
 
 	def return_void(self):
-		return
+		if self.symbol_table.get_function() != "main":
+			self.jump_out_of_function()
+		else:
+			self.add_code(["END"])
 
 	def check_all_function_have_signature(self):
 		for item in self.function_signatures:
@@ -614,8 +644,9 @@ class CodeGenerator:
 			error_handler("Syntax Error", "There is not int main that have no input variable")
 
 		for item in self.function_call_jmp_that_do_not_have_pc:
+			item = list(item)
 			self.finalCode.update_code(item[0], 1,
-									   self.function_signatures[item[1]]["signatures"][item[2]]['start_point'])
+				   str(self.function_signatures[item[1]]["signatures"][item[2]]['start_point']))
 
 	def generate_code(self, semantic_code, next_token):
 		self.next_token = next_token
