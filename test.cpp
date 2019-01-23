@@ -1,9 +1,9 @@
+int a;
+
 function int main2(int x){
     int x=3;
 }
-function void main3(int x){
-    int x=3;
-}
+function void main3(int x);
 function void main(){
 	int a;
 	int b;
@@ -11,5 +11,9 @@ function void main(){
 		++a;
 	}
     int x;
-    call main3(x);
+    call main2(x);
+}
+
+function void main3(int x){
+
 }

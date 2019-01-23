@@ -85,7 +85,8 @@ class CodeGenerator:
 		self.finalCode.add_code(code)
 
 	def check_type(self, operand0, operand2, operand3):
-		if self.symbol_table.get_var_type(operand2) == "double" and self.symbol_table.get_var_type(operand3) == "double":
+		if self.symbol_table.get_var_type(operand2) == "double" and self.symbol_table.get_var_type(
+				operand3) == "double":
 			return "double"
 		if self.symbol_table.get_var_type(operand2) == "int" and self.symbol_table.get_var_type(operand3) == "int":
 			return "int"
@@ -474,6 +475,10 @@ class CodeGenerator:
 			function_declaration['signatures'].append(obj)
 		elif state == 2:
 			function_declaration['signatures'][signature_index] = obj
+		self.function_called()
+
+	def function_called(self):
+		pass
 
 	def signature_function_declaration(self):
 		pushed = []
@@ -569,7 +574,6 @@ class CodeGenerator:
 				break
 			func_id += 1
 
-		return_address_size = 4
 		return_value_size = self.symbol_table.get_size(self.function_signatures[func_id]['function_return_type'])
 		var_size = self.symbol_table.get_all_var_size()
 		variables = var_size[1]
@@ -582,7 +586,7 @@ class CodeGenerator:
 				pop_code.append(["pop", now_address])  # , "-", str(now_address + var[2])
 				self.add_code(code)
 				now_address += var[2]
-		code = ["push", self.get_pc() + 2]
+		code = ["push", "#" + str(self.get_pc() + 2)]
 		self.add_code(code)
 		code = ["jmp", start_point_of_jump]
 		if start_point_of_jump == self._WILL_BE_SET_LATER:
@@ -597,7 +601,6 @@ class CodeGenerator:
 		pop_code = reversed(pop_code)
 		for pop in pop_code:
 			self.add_code(pop)
-
 
 	def return_not_void(self):
 		return
@@ -614,6 +617,10 @@ class CodeGenerator:
 			error_handler("Syntax Error", "There is not int main that have no input variable")
 
 		for item in self.function_call_jmp_that_do_not_have_pc:
+			item = list(item)
+			# print(len(item))
+			# print(item)
+			self.finalCode.print_codes()
 			self.finalCode.update_code(item[0], 1,
 									   self.function_signatures[item[1]]["signatures"][item[2]]['start_point'])
 

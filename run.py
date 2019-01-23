@@ -2,10 +2,9 @@ from codeGenerator import FinalCode
 from parser import Parser
 from scanner import FINAL_STATES, TRANSITIONS, KEYWORDS
 from scanner import Scanner
-import resource, sys
 
-resource.setrlimit(resource.RLIMIT_STACK, (2 ** 29, -1))
-sys.setrecursionlimit(10 ** 6)
+# resource.setrlimit(resource.RLIMIT_STACK, (2 ** 29, -1))
+# sys.setrecursionlimit(10 ** 6)
 
 GRAMMAR_FILE_PATH = "grammar.in"
 source_code_file_path = "test.cpp"
