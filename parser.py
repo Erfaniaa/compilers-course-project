@@ -104,10 +104,9 @@ class Parser:
 			loop_counter += 1
 			last_token = tokens[-2]
 
-			if top == self._BOOLEAN_EXPRESSION_STRING and open_parentheses_count == 1:
+			if top == self._BOOLEAN_EXPRESSION_STRING and open_parentheses_count == 1 and tokens[idx - 1].value == '(':
 				self.parse_stack.pop()
 				top = self._get_parse_stack_top()
-				use_boolean_expression_parser = True
 				boolean_expression_tokens = []
 				while open_parentheses_count != 0:
 					boolean_expression_tokens.append(tokens[idx])
@@ -117,7 +116,25 @@ class Parser:
 						open_parentheses_count -= 1
 					idx += 1
 				idx -= 1
+				open_parentheses_count += 1
 				boolean_expression_tokens.pop()
+				try:
+					tmp = boolean_expression_parser.parse(boolean_expression_tokens)
+				except:
+					error_handler("Syntax Error", " error in boolean expression")
+				continue
+
+			elif top == self._BOOLEAN_EXPRESSION_STRING and tokens[idx - 1].value == ';':
+				self.parse_stack.pop()
+				top = self._get_parse_stack_top()
+				boolean_expression_tokens = []
+				while tokens[idx].value != ";":
+					boolean_expression_tokens.append(tokens[idx])
+					if tokens[idx].value == "(":
+						open_parentheses_count += 1
+					if tokens[idx].value == ")":
+						open_parentheses_count -= 1
+					idx += 1
 				try:
 					tmp = boolean_expression_parser.parse(boolean_expression_tokens)
 				except:

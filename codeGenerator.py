@@ -19,14 +19,14 @@ class FinalCode:
 			return False
 		return True
 
-	def print_codes(self):
+	def print_codes(self, file):
 		idx = 0
 		for code in self.codes:
 			temp = str(idx) + " "
 			for x in code:
 				temp += str(x)
 				temp += " "
-			print(temp)
+			file.write(temp + "\r\n")
 			idx += 1
 
 

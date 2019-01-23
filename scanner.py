@@ -1,6 +1,7 @@
 import re
 from enum import Enum
 
+CHAR_END_STATE_STRING = "char_end"
 
 class Transition:
 	def __init__(self, src="", dst="", condition=r""):
@@ -90,7 +91,7 @@ TRANSITIONS = [
 	Transition('comment_end_star', 'comment_end', r'\/'),
 	Transition('new_token', 'char_start', r'[\']'),
 	Transition('char_start', 'char', r'[^\']'),
-	Transition('char', 'char_end', r'[\']'),
+	Transition('char', CHAR_END_STATE_STRING, r'[\']'),
 ]
 FINAL_STATES = {
 	'colon': TokenType.special_token,
@@ -112,7 +113,7 @@ FINAL_STATES = {
 	'number_with_fractions': TokenType.number,
 	'number_wholes': TokenType.number,
 	'string_end': TokenType.string,
-	'char_end': TokenType.string,
+	CHAR_END_STATE_STRING: TokenType.string,
 	'comment_end': TokenType.comment,
 	'not': TokenType.special_token,
 	'not_equal': TokenType.special_token,
@@ -176,6 +177,8 @@ class Scanner:
 			if self._is_keyword(ret):
 				return Token(ret, TokenType.keyword)
 			else:
+				if self.state == CHAR_END_STATE_STRING:
+					return Token(str(ord(ret[1])), TokenType.number)
 				return Token(ret, self._get_final_state_token_type(self.state))
 		else:
 			self.current_char_idx += 1
