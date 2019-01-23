@@ -1,4 +1,11 @@
+#TODO read character
 #TODO cast char float to number  # True False
-#TODO bottom up parser
 #TODO function call
-#TODO structure
+#TODO match()
+#TODO for and assignment bottom-up parsing
+#TODO not, -3
+#TODO parse table
+#TODO try except for boolean parsing
+#TODO GUI
+#TODO save to file
+#TODO check types for +=

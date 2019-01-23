@@ -62,7 +62,6 @@ class CalculateBooleanExpressionTree(Transformer):
         return str(x)
 
     def identifier(self, x):
-        # print("identifier called")
         return str(x)
 
     def and_expression(self, x, y):
@@ -92,8 +91,6 @@ class CalculateBooleanExpressionTree(Transformer):
     def comparision_expression(self, x, y, jump_type):
         oper2_var = x
         oper3_var = y
-        # print("x y")
-        # print(x, y)
         operand2 = self._code_generator.get_address_or_immediate_value(oper2_var)
         operand3 = self._code_generator.get_address_or_immediate_value(oper3_var)
         temp_var_type = self._code_generator.check_type("less", oper2_var, oper3_var)
@@ -111,11 +108,9 @@ class CalculateBooleanExpressionTree(Transformer):
         self._code_generator.add_code(code2)
         self._code_generator.add_code(code3)
         self._code_generator.add_code(code4)
-        # print("temp2: ", temp2)
         return temp2
 
     def less_expression(self, x, y):
-        # print("less called")
         return self.comparision_expression(x, y, "jl")
 
     def greater_expression(self, x, y):
@@ -142,5 +137,4 @@ class BooleanExpressionParser:
 
     def parse(self, tokens):
         token_values_str = " ".join([str(token.value) for token in tokens])
-        # print("token_values_str: ", token_values_str)
         self._lark_parser.parse(token_values_str)

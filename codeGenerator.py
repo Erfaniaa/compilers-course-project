@@ -51,6 +51,7 @@ class CodeGenerator:
 	_START_OF_SWITCH = "!"
 	_START_OF_FUNCTION = "&"
 	_START_OF_FUNCTION_CALL = "*"
+	_ASSIGNMENT_OPERATOR_TO_OPERATION = {"+=": "add", "-=": "sub", "*=": "mult", "/=": "div"}
 
 	def __init__(self, parser, symbol_table):
 		self.symbol_table = symbol_table
@@ -181,16 +182,9 @@ class CodeGenerator:
 			code.append("mov")
 			right_code.append(operand3)
 		else:
-			right_code.append(operand1)
 			right_code.append(operand3)
-			if assignment_operator == "+=":
-				code.append("add")
-			elif assignment_operator == "-=":
-				code.append("sub")
-			elif assignment_operator == "*=":
-				code.append("mult")
-			elif assignment_operator == "/=":
-				code.append("div")
+			right_code.append(operand1)
+			code.append(self._ASSIGNMENT_OPERATOR_TO_OPERATION[assignment_operator])
 		code.append(operand1)
 		for right in right_code:
 			code.append(right)
@@ -345,7 +339,7 @@ class CodeGenerator:
 		temp_var_type = self.check_type(operand0, oper2_var, oper3_var)
 		destination_temp = self.get_temp(temp_var_type)
 		operand1 = self.get_address_or_immediate_value(destination_temp)
-		code = [operand0, operand1, operand2, operand3]
+		code = [operand0, operand1, operand3, operand2]
 		self.add_code(code)
 		self.push_to_semantic_stack(destination_temp)
 
@@ -596,7 +590,6 @@ class CodeGenerator:
 				{int(self.get_pc()), func_id, sign_id})
 		self.add_code(code)
 		if return_value_size > 0:
-			print(self.function_signatures[func_id]['function_return_type'])
 			temp = self.symbol_table.new_temp(self.function_signatures[func_id]['function_return_type'])
 			code = ["pop", self.get_address_or_immediate_value(temp)]
 			self.add_code(code)
@@ -605,13 +598,6 @@ class CodeGenerator:
 		for pop in pop_code:
 			self.add_code(pop)
 
-	# print(return_address_size, return_value_size, var_size)
-
-	# return address 4
-	# return value  =get signature return type  1 2 4 8
-	# temp_size
-
-	# TODO know func_id des_id start_point and sign matched
 
 	def return_not_void(self):
 		return
@@ -633,5 +619,4 @@ class CodeGenerator:
 
 	def generate_code(self, semantic_code, next_token):
 		self.next_token = next_token
-		# print("semantic code = ", semantic_code)
 		getattr(self, semantic_code[1:])()

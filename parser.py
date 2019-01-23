@@ -19,6 +19,8 @@ class Parser:
 	_INVALID = -1
 	_SEMANTIC_RULE_CHARACTER = '@'
 	_END_OF_FILE_CHARACTER = '$'
+	_BOOLEAN_EXPRESSION_STRING = "BOOLEAN_EXPRESSION"
+
 
 	@staticmethod
 	def is_variable(s):
@@ -98,76 +100,28 @@ class Parser:
 		top = self._start_variable
 		loop_counter = 0
 		open_parentheses_count = 0
-		use_boolean_expression_parser = False
-		boolean_expression_tokens = []
 		while top != self._END_OF_FILE_CHARACTER:
-			# print("-----------")
-			# # print("top = ", top)
-			# # print(self.parse_stack)
-			# # print(tokens[idx:])
-			# # print(tokens[idx])
-			# # print("next_token = ", tokens[idx].value)
-			# # print(open_parentheses_count)
-			# # print(use_boolean_expression_parser)
-			# # print(str(idx) + " " + str(last_idx))
 			loop_counter += 1
 			last_token = tokens[-2]
-			if True:
-				if top == "BOOLEAN_EXPRESSION" and open_parentheses_count == 1:
-					# # print("here 5")
-					self.parse_stack.pop()
-					top = self._get_parse_stack_top()
-					use_boolean_expression_parser = True
-					boolean_expression_tokens = []
-					while open_parentheses_count != 0:
-						boolean_expression_tokens.append(tokens[idx])
-						if tokens[idx].value == "(":
-							open_parentheses_count += 1
-						if tokens[idx].value == ")":
-							open_parentheses_count -= 1
-						idx += 1
-						# print(open_parentheses_count)
-						# print(tokens[idx])
-					# # print(boolean_expression_tokens)
-					idx -= 1
-					boolean_expression_tokens.pop()
-					tmp = boolean_expression_parser.parse(boolean_expression_tokens)
-					# print("tmp: " + str(tmp))
-					# code_generator.push_to_semantic_stack(tmp)
-					continue
 
-				# if idx != last_idx and tokens[idx].value == "(":
-					# print("here 2")
-				# 	open_parentheses_count += 1
-				# if idx != last_idx and tokens[idx].value == ")":
-				# 	open_parentheses_count -= 1
-					# print("here 3")
-				# 	if open_parentheses_count == 0 and use_boolean_expression_parser:
-						# print("here 4")
-						# # print("**********")
-						# # print(boolean_expression_tokens)
-						# # print("**********")
-				# 		boolean_expression_parser.parse(boolean_expression_tokens)
-				# 		boolean_expression_tokens = []
-				# 		use_boolean_expression_parser = False
-				# 		# top = self._get_parse_stack_top()
-						# # print("top = ", top)
-						# # print(self.parse_stack)
-						# # print(tokens[idx:])
-						# # print(tokens[idx])
-				# 		# last_idx = idx
-				# 		# continue
-				# print("use, idx, last_idx", use_boolean_expression_parser, idx, last_idx)
-				# if use_boolean_expression_parser and idx != last_idx:
-				# 	boolean_expression_tokens.append(tokens[idx])
-					# print("here 1")
-				# 	last_idx = idx
-				# 	idx += 1
-				# 	continue
+			if top == self._BOOLEAN_EXPRESSION_STRING and open_parentheses_count == 1:
+				self.parse_stack.pop()
+				top = self._get_parse_stack_top()
+				use_boolean_expression_parser = True
+				boolean_expression_tokens = []
+				while open_parentheses_count != 0:
+					boolean_expression_tokens.append(tokens[idx])
+					if tokens[idx].value == "(":
+						open_parentheses_count += 1
+					if tokens[idx].value == ")":
+						open_parentheses_count -= 1
+					idx += 1
+				idx -= 1
+				boolean_expression_tokens.pop()
+				tmp = boolean_expression_parser.parse(boolean_expression_tokens)
+				continue
 
-			last_idx = idx
 			top = self._get_parse_stack_top()
-			# # print("here here")
 			if top == self._NIL_STRING:
 				top = self._get_parse_stack_top()
 				continue
@@ -228,9 +182,6 @@ class Parser:
 			except KeyError:
 				error_handler("Syntax Error", "6: Unable to find derivation of '{0}' on '{1}'")  # .format(top, nxt)
 			top = self._get_parse_stack_top()
-			# TODO  hess mikonam inja baiadd error bede
-		# print("natije:")
-		# print(boolean_expression_parser.parse("10 < 10"))
 		return True
 
 	def _fill_parse_table(self):
@@ -243,12 +194,6 @@ class Parser:
 			for terminal in self._terminals:
 				if terminal in self._predicts[rule_id]:
 					if self._parse_table[variable][terminal] != Parser._INVALID:
-						# print(terminal)
-						# print(variable)
-						# print(rule_id)
-						# print(self._rules[rule_id])
-						# print(self._rules[self._parse_table[variable][terminal]])
-						# print(self._is_nullable_variable('NOT_VOID_FUNCTION_STATEMENT'))
 						error_handler("Grammer Error",
 									  "The grammar is not LL1. Variable: " + str(variable) + " Terminal: " + str(
 										  terminal))
@@ -381,7 +326,6 @@ class Parser:
 			self._nullable_variables.append(rule_text_tokens[0])
 		key = rule_text_tokens[0]
 		del rule_text_tokens[1]
-		# print("x = ", rule_text_tokens)
 		self._rules.append(copy.deepcopy(rule_text_tokens))
 		del rule_text_tokens[0]
 		temp_list = []
