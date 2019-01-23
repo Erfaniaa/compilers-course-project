@@ -31,8 +31,7 @@ class FinalCode:
 
 
 class CodeGenerator:
-	function_return_value = []
-	function_return_address = []
+	function_return_address = {}
 	function_signatures = []
 	semantic_stack = []
 	switch_stack = []
@@ -57,8 +56,8 @@ class CodeGenerator:
 		self.symbol_table = symbol_table
 		self.parser = parser
 
-	def get_temp(self, size):
-		return self.symbol_table.new_temp(size)
+	def get_temp(self, temp_type):
+		return self.symbol_table.new_temp(temp_type)
 
 	def get_address_or_immediate_value(self, value):
 		value = str(value)
@@ -352,8 +351,8 @@ class CodeGenerator:
 			error_handler("Syntax Error", array_name + " is not array")
 		array_start = array.address
 		array_type_size = array.type_size
-		temp1_address = self.get_address_or_immediate_value(self.get_temp(4))
-		temp2 = self.get_temp(4)
+		temp1_address = self.get_address_or_immediate_value(self.get_temp("int"))
+		temp2 = self.get_temp("int")
 		temp2_address = self.get_address_or_immediate_value(temp2)
 		code1 = ["mult", temp1_address, array_type_size, index]
 		code2 = ["add", temp2_address, array_start, temp1_address]
@@ -475,10 +474,21 @@ class CodeGenerator:
 			function_declaration['signatures'].append(obj)
 		elif state == 2:
 			function_declaration['signatures'][signature_index] = obj
-		self.function_called()
+		self.function_called(obj)
 
-	def function_called(self):
-		pass
+	def function_called(self, signature):
+		idx = len(signature["var_names"]) - 1
+		while idx >= 0:
+			var_name = signature["var_names"][idx]
+			var_type = signature["var_types"][idx]
+			self.symbol_table.new_variable(var_name, var_type, 1)
+			code = ["pop", self.get_address_or_immediate_value(var_name)]
+			self.add_code(code)
+			idx -= 1
+		dest_temp = self.symbol_table.new_temp("int")
+		code = ["pop", self.get_address_or_immediate_value(dest_temp)]
+		self.add_code(code)
+		self.function_return_address = dest_temp
 
 	def signature_function_declaration(self):
 		pushed = []
@@ -528,7 +538,16 @@ class CodeGenerator:
 		elif state == 1:
 			function_declaration['signatures'].append(obj)
 
+	def jump_out_of_not_void_function(self):
+		self.add_code(["push", "#0"])
+		self.jump_out_of_function()
+
+	def jump_out_of_void_function(self):
+		self.jump_out_of_function()
+
 	def jump_out_of_function(self):
+		code = ["jmp", self.get_address_or_immediate_value(self.function_return_address)]
+		self.add_code(code)
 		return
 
 	def call_function(self):
@@ -606,9 +625,13 @@ class CodeGenerator:
 			self.add_code(pop)
 
 	def return_not_void(self):
-		return
+		return_value_address = self.get_address_or_immediate_value(self.get_next_token_value())
+		code = ["push", return_value_address]
+		self.add_code(code)
+		self.jump_out_of_function()
 
 	def return_void(self):
+		self.jump_out_of_function()
 		return
 
 	def check_all_function_have_signature(self):

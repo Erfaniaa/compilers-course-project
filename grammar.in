@@ -20,10 +20,10 @@ FUNCTION_DECLARATION -> @start_of_function function FUNCTION_DECLARATION2
 FUNCTION_DECLARATION2 -> @push void @push identifier ( FUNCTION_VARIABLES ) REST_OF_FUNCTION_VOID
 FUNCTION_DECLARATION2 -> @push TYPE @push identifier ( FUNCTION_VARIABLES ) REST_OF_FUNCTION_NOT_VOID
 
-REST_OF_FUNCTION_VOID -> { @function_declaration VOID_FUNCTION_STATEMENT_LANGUAGE @jump_out_of_function }
+REST_OF_FUNCTION_VOID -> { @function_declaration VOID_FUNCTION_STATEMENT_LANGUAGE @jump_out_of_void_function }
 REST_OF_FUNCTION_VOID -> @signature_function_declaration ;
 
-REST_OF_FUNCTION_NOT_VOID -> { @function_declaration NOT_VOID_FUNCTION_STATEMENT_LANGUAGE @jump_out_of_function }
+REST_OF_FUNCTION_NOT_VOID -> { @function_declaration NOT_VOID_FUNCTION_STATEMENT_LANGUAGE @jump_out_of_not_void_function }
 REST_OF_FUNCTION_NOT_VOID -> @signature_function_declaration ;
 
 FUNCTION_VARIABLES -> nil
