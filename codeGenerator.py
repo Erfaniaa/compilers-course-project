@@ -588,6 +588,9 @@ class CodeGenerator:
 				now_address += var[2]
 		code = ["push", "#" + str(self.get_pc() + 2)]
 		self.add_code(code)
+		for push in pushed:
+			code = ["push", self.get_address_or_immediate_value(push)]
+			self.add_code(code)
 		code = ["jmp", start_point_of_jump]
 		if start_point_of_jump == self._WILL_BE_SET_LATER:
 			self.function_call_jmp_that_do_not_have_pc.append(
