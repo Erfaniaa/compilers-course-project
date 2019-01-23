@@ -13,7 +13,6 @@ function void main(){
     int x;
     call main2(x);
 }
-
 function void main3(int x){
 
 }
