@@ -566,14 +566,12 @@ class CodeGenerator:
 		func_id = 0
 		sign_id = 0
 		start_point_of_jump = -1
+		found = False
 		for function_dec in self.function_signatures:
-			found = False
-			got_in = False
 			if function_dec["function_name"] != function_name:
 				func_id += 1
 				continue
 			sign_id = 0
-			got_in = True
 			for signature in function_dec["signatures"]:
 				is_same = True
 				if len(signature['var_types']) != len(pushed):
@@ -589,12 +587,12 @@ class CodeGenerator:
 					start_point_of_jump = signature["start_point"]
 					break
 				sign_id += 1
-			if got_in and not found:
-				error_handler("Syntax error", "no function with this name and signature")
 			if found:
 				break
-			func_id += 1
-
+			else:
+				error_handler("Syntax error", "no function with this name and signature")
+		if not found:
+			error_handler("Syntax error", "function is not declared")
 		return_value_size = self.symbol_table.get_size(self.function_signatures[func_id]['function_return_type'])
 		var_size = self.symbol_table.get_all_var_size()
 		variables = var_size[1]
@@ -614,8 +612,7 @@ class CodeGenerator:
 			self.add_code(code)
 		code = ["jmp", start_point_of_jump]
 		if start_point_of_jump == self._WILL_BE_SET_LATER:
-			self.function_call_jmp_that_do_not_have_pc.append(
-				{int(self.get_pc()), func_id, sign_id})
+			self.function_call_jmp_that_do_not_have_pc.append([int(self.get_pc()), func_id, sign_id])
 		self.add_code(code)
 		if return_value_size > 0:
 			temp = self.symbol_table.new_temp(self.function_signatures[func_id]['function_return_type'])
@@ -648,11 +645,8 @@ class CodeGenerator:
 
 		for item in self.function_call_jmp_that_do_not_have_pc:
 			item = list(item)
-			# print(len(item))
-			# print(item)
-			self.finalCode.print_codes()
 			self.finalCode.update_code(item[0], 1,
-									   self.function_signatures[item[1]]["signatures"][item[2]]['start_point'])
+				   str(self.function_signatures[item[1]]["signatures"][item[2]]['start_point']))
 
 	def generate_code(self, semantic_code, next_token):
 		self.next_token = next_token
