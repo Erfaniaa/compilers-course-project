@@ -56,8 +56,6 @@ CALL_FUNCTION3 -> ) @finish_function_call
 #CALL_FUNCTION_OR_identifier -> CALL_FUNCTION
 #CALL_FUNCTION_OR_identifier -> @push identifier
 
-
-
 TYPE -> int
 TYPE -> char
 TYPE -> double

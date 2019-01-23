@@ -118,7 +118,10 @@ class Parser:
 					idx += 1
 				idx -= 1
 				boolean_expression_tokens.pop()
-				tmp = boolean_expression_parser.parse(boolean_expression_tokens)
+				try:
+					tmp = boolean_expression_parser.parse(boolean_expression_tokens)
+				except:
+					error_handler("Syntax Error", " error in boolean expression")
 				continue
 
 			top = self._get_parse_stack_top()

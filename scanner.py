@@ -88,6 +88,9 @@ TRANSITIONS = [
 	Transition('comment_end_star', 'comment', r'[^\*\/]'),
 	Transition('comment_end_star', 'comment_end_star', r'\*'),
 	Transition('comment_end_star', 'comment_end', r'\/'),
+	Transition('new_token', 'char_start', r'[\']'),
+	Transition('char_start', 'char', r'[^\']'),
+	Transition('char', 'char_end', r'[\']'),
 ]
 FINAL_STATES = {
 	'colon': TokenType.special_token,
@@ -109,6 +112,7 @@ FINAL_STATES = {
 	'number_with_fractions': TokenType.number,
 	'number_wholes': TokenType.number,
 	'string_end': TokenType.string,
+	'char_end': TokenType.string,
 	'comment_end': TokenType.comment,
 	'not': TokenType.special_token,
 	'not_equal': TokenType.special_token,
