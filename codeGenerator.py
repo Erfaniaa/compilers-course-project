@@ -481,7 +481,10 @@ class CodeGenerator:
 		while idx >= 0:
 			var_name = signature["var_names"][idx]
 			var_type = signature["var_types"][idx]
-			self.symbol_table.new_variable(var_name, var_type, 1)
+			if not self.symbol_table.is_var_declared(var_name):
+				self.symbol_table.new_variable(var_name, var_type)
+			else:
+				error_handler("Syntax Error", "variable with name " + var_name + " has already declared ")
 			code = ["pop", self.get_address_or_immediate_value(var_name)]
 			self.add_code(code)
 			idx -= 1
@@ -543,7 +546,7 @@ class CodeGenerator:
 		self.jump_out_of_function()
 
 	def jump_out_of_void_function(self):
-		self.jump_out_of_function()
+		self.return_void()
 
 	def jump_out_of_function(self):
 		code = ["jmp", self.get_address_or_immediate_value(self.function_return_address)]
@@ -552,7 +555,6 @@ class CodeGenerator:
 
 	def call_function(self):
 		self.push_to_semantic_stack(self._START_OF_FUNCTION_CALL)
-		return
 
 	def finish_function_call(self):
 		pushed = []
@@ -605,7 +607,7 @@ class CodeGenerator:
 				pop_code.append(["pop", now_address])  # , "-", str(now_address + var[2])
 				self.add_code(code)
 				now_address += var[2]
-		code = ["push", "#" + str(self.get_pc() + 2)]
+		code = ["push", "#" + str(self.get_pc() + 2 + len(pushed))]
 		self.add_code(code)
 		for push in pushed:
 			code = ["push", self.get_address_or_immediate_value(push)]
@@ -631,8 +633,10 @@ class CodeGenerator:
 		self.jump_out_of_function()
 
 	def return_void(self):
-		self.jump_out_of_function()
-		return
+		if self.symbol_table.get_function() != "main":
+			self.jump_out_of_function()
+		else:
+			self.add_code(["END"])
 
 	def check_all_function_have_signature(self):
 		for item in self.function_signatures:

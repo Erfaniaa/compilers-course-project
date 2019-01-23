@@ -84,6 +84,11 @@ class SymbolTable:
 		self.make_full_bitmap(address, size)
 
 	def new_variable(self, name, type_of_var, scope_update=0):
+		if name == "xyz" and len(self.symbols) == 2:
+			print(self.symbols[0].var_name)
+			print(self.symbols[0].address)
+			print(self.symbols[1].var_name)
+			print(self.symbols[1].address)
 		size = self.get_size(type_of_var)
 		address = self.find_empty_in_bitmap(size)
 		var = Symbol(name, type_of_var, "var", self.function, self.scope + scope_update, size, size, address)
@@ -131,6 +136,9 @@ class SymbolTable:
 		if best_symbol_address == -1:
 			error_handler("Syntax Error", str(var_name) + " is not declared")
 		return var
+
+	def get_function(self):
+		return self.function
 
 	def get_var_address(self, var_name):
 		var = self.get_var(var_name)
