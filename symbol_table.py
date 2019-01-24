@@ -170,3 +170,5 @@ class SymbolTable:
 			if symbol.var_name == var_name and symbol.function == self.function and self.scope == symbol.scope:
 				return True
 		return False
+
+
