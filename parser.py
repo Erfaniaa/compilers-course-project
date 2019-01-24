@@ -1,11 +1,9 @@
-import copy
-import re
-
+import copy, re
 from boolean_expression_parser import BooleanExpressionParser
-from codeGenerator import CodeGenerator
-from codeGenerator import FinalCode
+from code_generator import CodeGenerator
+from code_generator import FinalCodes
 from scanner import TokenType, Token
-from symbolTable import SymbolTable
+from symbol_table import SymbolTable
 from utils import add_element_to_set, add_list_of_elements_to_set, error_handler
 
 
@@ -62,6 +60,9 @@ class Parser:
 	def __init__(self, start_variable):
 		self.clear()
 		self.set_start_variable(start_variable)
+		self.set_final_code(FinalCodes())
+		self.set_symbol_table(SymbolTable())
+		self.set_code_generator(CodeGenerator(self, self._symbol_table))
 
 	def clear(self):
 		self._variables = []
@@ -73,30 +74,42 @@ class Parser:
 		self._follows = {}
 		self._predicts = {}
 		self._parse_table = {}
-		self.parse_stack = []
-		self.final_code = FinalCode()
-		self.symbol_table = SymbolTable()
+		self._parse_stack = []
+		self._final_code = None
+		self._symbol_table = None
+		self._code_generator = None
+		self._boolean_expression_parser = None
 
 	def set_start_variable(self, start_variable):
 		self._start_variable = start_variable
+
+	def set_final_code(self, final_code):
+		self._final_code = final_code
+
+	def set_symbol_table(self, symbol_table):
+		self._symbol_table = symbol_table
+
+	def set_code_generator(self, code_generator):
+		self._code_generator = code_generator
+
+	def set_boolean_expression_parser(self, boolean_expression_parser):
+		self._boolean_expression_parser = boolean_expression_parser
 
 	def _is_nullable_variable(self, variable):
 		return variable in self._nullable_variables
 
 	def _get_parse_stack_top(self):
-		while self.parse_stack[-1] == self._NIL_STRING:
-			self.parse_stack.pop()
-		return self.parse_stack[-1]
+		while self._parse_stack[-1] == self._NIL_STRING:
+			self._parse_stack.pop()
+		return self._parse_stack[-1]
 
-	def match(self, tokens):
-		code_generator = CodeGenerator(self, self.symbol_table)
-		boolean_expression_parser = BooleanExpressionParser(code_generator)
+	def parse(self, tokens):
 		tokens.append(Token('eof', 'keyword'))
 		tokens.append(self._END_OF_FILE_CHARACTER)
 		last_idx = -1
 		idx = 0
-		self.parse_stack.append(self._END_OF_FILE_CHARACTER)
-		self.parse_stack.append(self._start_variable)
+		self._parse_stack.append(self._END_OF_FILE_CHARACTER)
+		self._parse_stack.append(self._start_variable)
 		top = self._start_variable
 		loop_counter = 0
 		open_parentheses_count = 0
@@ -105,7 +118,7 @@ class Parser:
 			last_token = tokens[-2]
 
 			if top == self._BOOLEAN_EXPRESSION_STRING and open_parentheses_count == 1 and tokens[idx - 1].value == '(':
-				self.parse_stack.pop()
+				self._parse_stack.pop()
 				top = self._get_parse_stack_top()
 				boolean_expression_tokens = []
 				while open_parentheses_count != 0:
@@ -119,13 +132,13 @@ class Parser:
 				open_parentheses_count += 1
 				boolean_expression_tokens.pop()
 				try:
-					tmp = boolean_expression_parser.parse(boolean_expression_tokens)
+					self._boolean_expression_parser.parse(boolean_expression_tokens)
 				except:
-					error_handler("Syntax Error", " error in boolean expression")
+					error_handler("Syntax Error:", " error in boolean expression")
 				continue
 
 			elif top == self._BOOLEAN_EXPRESSION_STRING and tokens[idx - 1].value == ';':
-				self.parse_stack.pop()
+				self._parse_stack.pop()
 				top = self._get_parse_stack_top()
 				boolean_expression_tokens = []
 				while tokens[idx].value != ";":
@@ -136,9 +149,9 @@ class Parser:
 						open_parentheses_count -= 1
 					idx += 1
 				try:
-					tmp = boolean_expression_parser.parse(boolean_expression_tokens)
+					self._boolean_expression_parser.parse(boolean_expression_tokens)
 				except:
-					error_handler("Syntax Error", " error in boolean expression")
+					error_handler("Syntax Error:", " error in boolean expression")
 				continue
 
 			top = self._get_parse_stack_top()
@@ -147,44 +160,44 @@ class Parser:
 				continue
 			if self.is_semantic_rule(top):					
 				semantic = top
-				self.parse_stack.pop()
+				self._parse_stack.pop()
 				top = self._get_parse_stack_top()
-				code_generator.generate_code(semantic, tokens[idx])
+				self._code_generator.generate_code(semantic, tokens[idx])
 				continue
 			if loop_counter > len(tokens) * 20:
-				error_handler("Syntax Error", " (1) next token should not be " + str(tokens[idx]))
+				error_handler("Syntax Error:", " (1) next token should not be " + str(tokens[idx]))
 			if top == self._IDENTIFIER_STRING:
 				if tokens[idx].type == TokenType.identifier:
 					idx = idx + 1
-					self.parse_stack.pop()
+					self._parse_stack.pop()
 					top = self._get_parse_stack_top()
 					continue
 				else:
-					error_handler("Syntax Error", " (2) next token should not be " + str(tokens[idx]))
+					error_handler("Syntax Error:", " (2) next token should not be " + str(tokens[idx]))
 			elif top == self._NUMBER_STRING:
 				if tokens[idx].type == TokenType.number:
 					idx = idx + 1
-					self.parse_stack.pop()
+					self._parse_stack.pop()
 					top = self._get_parse_stack_top()
 					continue
 				else:
-					error_handler("Syntax Error", " (3) next token should not be " + str(tokens[idx]))
+					error_handler("Syntax Error:", " (3) next token should not be " + str(tokens[idx]))
 			elif self.is_terminal(top):
 				if tokens[idx].value == "(":
 					open_parentheses_count += 1
 				if tokens[idx].value == ")":
 					open_parentheses_count -= 1
 				if top == "{":
-					self.symbol_table.one_scope_in()
+					self._symbol_table.one_scope_in()
 				if top == "}":
-					self.symbol_table.one_scope_out()
+					self._symbol_table.one_scope_out()
 				if tokens[idx].value == top:
 					idx = idx + 1
-					self.parse_stack.pop()
+					self._parse_stack.pop()
 					top = self._get_parse_stack_top()
 					continue
 				else:
-					error_handler("Syntax Error", " (4) next token should not be " + str(tokens[idx]))
+					error_handler("Syntax Error:", " (4) next token should not be " + str(tokens[idx]))
 			try:
 				try:
 					nxt = tokens[idx].value
@@ -194,13 +207,13 @@ class Parser:
 						nxt = self._NUMBER_STRING
 					rule_idx = self._parse_table[top][nxt]
 					product = self._rules[rule_idx][1:]
-					self.parse_stack.pop()
+					self._parse_stack.pop()
 					if product != [self._NIL_STRING]:
-						self.parse_stack.extend(reversed(product))
+						self._parse_stack.extend(reversed(product))
 				except:
-					error_handler("Syntax Error", " (5)")
+					error_handler("Syntax Error:", " (5)")
 			except KeyError:
-				error_handler("Syntax Error", "6: Unable to find derivation of '{0}' on '{1}'")  # .format(top, nxt)
+				error_handler("Syntax Error:", "6: Unable to find derivation of '{0}' on '{1}'".format(top, nxt))
 			top = self._get_parse_stack_top()
 		return True
 
@@ -354,9 +367,9 @@ class Parser:
 		temp_list.append(rule_text_tokens)
 		self._variable_rules[key] = temp_list
 
-	def _make_grammar_from_text(self, rules_text):
+	def _make_grammar_from_text(self, rules_file, boolean_expression_rules_file):
 		while True:
-			line = rules_text.readline()
+			line = rules_file.readline()
 			if not line:
 				break
 			line = line.strip()
@@ -367,9 +380,9 @@ class Parser:
 			self._update_grammar(line)
 		return
 
-	def run(self, rules_text):
-		self.clear()
-		self._make_grammar_from_text(rules_text)
+	def process_rules(self, rules_file, boolean_expression_rules_file):
+		self.set_boolean_expression_parser(BooleanExpressionParser(boolean_expression_rules_file.read(), self._code_generator))
+		self._make_grammar_from_text(rules_file, boolean_expression_rules_file)
 		self._find_all_nullable_variables()
 		self._find_all_firsts()
 		self._find_all_follows()

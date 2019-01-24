@@ -184,7 +184,7 @@ class Scanner:
 			self.current_char_idx += 1
 			return Token(ret, TokenType.error)
 
-	def run(self):
+	def scan(self):
 		ret = []
 		while self.current_char_idx < len(self.text):
 			token = self._next_token()

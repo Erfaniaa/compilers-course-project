@@ -1,7 +1,7 @@
 from utils import error_handler
 
 
-class FinalCode:
+class FinalCodes:
 	codes = []
 	_WILL_BE_SET_LATER = "%"
 
@@ -19,14 +19,14 @@ class FinalCode:
 			return False
 		return True
 
-	def print_codes(self, file):
+	def print_codes(self):
 		idx = 0
 		for code in self.codes:
-			temp = str(idx) + " "
+			temp = "line number " + str(idx) + ": "
 			for x in code:
 				temp += str(x)
 				temp += " "
-			file.write(temp + "\r\n")
+			print(temp)
 			idx += 1
 
 
@@ -39,9 +39,9 @@ class CodeGenerator:
 	loop_continues = []
 	loop_breaks = []
 	symbol_table = {}
-	finalCode = FinalCode()
+	finalCode = FinalCodes()
 	parser = {}
-	function_call_jmp_that_do_not_have_pc = []  # { address,shomare function , shomare signatures }
+	function_call_jmp_that_do_not_have_pc = []  # address, function number, signatures number
 	next_token = "-1"
 	_WILL_BE_SET_LATER = "%"
 	_START_OF_LOOP_CHAR = "^"

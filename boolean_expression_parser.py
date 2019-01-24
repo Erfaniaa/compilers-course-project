@@ -1,46 +1,5 @@
 from lark import Lark, Transformer, v_args
 
-BOOLEAN_EXPRESSION_GRAMMAR = """
-    ?start: boolean_sum -> return_final_result
-    
-    ?boolean_sum: boolean_product
-        | boolean_sum "or" boolean_product -> or_expression
-
-    ?boolean_product: boolean_atom
-        | boolean_product "and" boolean_atom -> and_expression
-
-    ?boolean_atom: "false"
-         | "true"
-         | "(" boolean_sum ")"
-         | sum_comparision
-
-    ?sum_comparision: sum "<" sum -> less_expression
-        | sum ">" sum -> greater_expression
-        | sum "==" sum -> equal_expression
-        | sum "!=" sum -> not_equal_expression
-        | sum ">=" sum -> greater_equal_expression
-        | sum "<=" sum -> less_equal_expression
-
-    ?sum: product
-        | sum "+" product -> add_expression
-        | sum "-" product -> sub_expression
-
-    ?product: atom
-        | product "*" atom -> mult_expression
-        | product "/" atom -> div_expression
-
-    ?atom: NUMBER -> number
-         | NAME -> identifier
-         | "(" sum ")"
-
-    %import common.CNAME -> NAME
-    %import common.NUMBER
-    %import common.WS_INLINE
-
-    %ignore WS_INLINE
-"""
-
-
 @v_args(inline=True)
 class CalculateBooleanExpressionTree(Transformer):
     def __init__(self, code_generator=None):
@@ -117,7 +76,6 @@ class CalculateBooleanExpressionTree(Transformer):
         return self.comparision_expression(x, y, "jg")
 
     def equal_expression(self, x, y):
-        print("equal called")
         return self.comparision_expression(x, y, "jeq")
 
     def not_equal_expression(self, x, y):
@@ -131,9 +89,9 @@ class CalculateBooleanExpressionTree(Transformer):
 
 
 class BooleanExpressionParser:
-    def __init__(self, code_generator=None):
+    def __init__(self, boolean_expression_grammar_text, code_generator):
         self._code_generator = code_generator
-        self._lark_parser = Lark(BOOLEAN_EXPRESSION_GRAMMAR, parser='lalr', transformer=CalculateBooleanExpressionTree(code_generator))
+        self._lark_parser = Lark(boolean_expression_grammar_text, parser='lalr', transformer=CalculateBooleanExpressionTree(code_generator))
 
     def parse(self, tokens):
         token_values_str = " ".join([str(token.value) for token in tokens])

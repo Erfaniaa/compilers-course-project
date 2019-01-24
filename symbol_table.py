@@ -18,7 +18,7 @@ class Symbol:
 class SymbolTable:
 	function = "Global"
 	scope = 0
-	bitmap = []  # 1 is empty  0 is full
+	bitmap = []  # 1 is empty 0 is full
 	symbols = []
 	symbols_size = {"void": 0, "int": 4, "char": 2, "double": 8, "bool": 1}
 
