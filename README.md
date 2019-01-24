@@ -1,5 +1,5 @@
 # Compilers Course Project
-> Converting a pseudo C++ source code to a pseudo assembly code
+> Converting a pseudo C source code to a pseudo assembly code
 
 For more information, read the PDF files which are located in this repository (they're in Persian language).
 
@@ -10,13 +10,13 @@ For more information, read the PDF files which are located in this repository (t
   
 ## Usage
 
-	python3 run.py input_file_name.cpp
+	python3 run.py input_file_name.c
 
-**Sample input (pseudo C++ source code):**
+**Sample input (pseudo C source code):**
 
-Check out [sample.cpp](https://github.com/Erfaniaa/compilers-course-project/blob/master/sample.cpp) in the repository.
+Check out [sample.c](https://github.com/Erfaniaa/compilers-course-project/blob/master/sample.c) in the repository.
 
-    python3 run.py sample.cpp
+    python3 run.py sample.c
 
 **Sample output (pseudo assembly codes):**
 
