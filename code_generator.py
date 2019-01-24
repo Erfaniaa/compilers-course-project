@@ -651,3 +651,4 @@ class CodeGenerator:
 	def generate_code(self, semantic_code, next_token):
 		self.next_token = next_token
 		getattr(self, semantic_code[1:])()
+

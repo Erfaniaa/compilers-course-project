@@ -415,3 +415,4 @@ class Parser:
 
 	def get_nullable_variables(self):
 		return self._nullable_variables
+

@@ -96,3 +96,4 @@ class BooleanExpressionParser:
     def parse(self, tokens):
         token_values_str = " ".join([str(token.value) for token in tokens])
         self._lark_parser.parse(token_values_str)
+

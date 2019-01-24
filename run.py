@@ -10,10 +10,18 @@ sys.setrecursionlimit(10 ** 6)
 GRAMMAR_FILE_PATH = "grammar.in"
 BOOLEAN_EXPRESSION_GRAMMAR_FILE_PATH = "boolean_expression_grammar.in"
 
-source_code_file_path = sys.argv[1]
-if not source_code_file_path or source_code_file_path == "":
+try:
+	source_code_file_path = sys.argv[1]
+except:
+	print("No source code files specified")
 	exit()
-text = open(source_code_file_path, 'r').read()
+
+try:
+	text = open(source_code_file_path, 'r').read()
+except:
+	print("Error in reading source code file")
+	exit()
+
 scanner = Scanner(text, 'new_token', FINAL_STATES, TRANSITIONS, KEYWORDS)
 scanner_result = scanner.scan()
 

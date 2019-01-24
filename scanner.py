@@ -191,3 +191,4 @@ class Scanner:
 			if token and len(token.value) > 0 and token.type != TokenType.comment:
 				ret.append(token)
 		return ret
+
