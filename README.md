@@ -14,7 +14,7 @@ For more information, read the PDF files which are located in this repository (t
 
 **Sample input (pseudo C source code):**
 
-Check out [sample.c](https://github.com/Erfaniaa/compilers-course-project/blob/master/sample.c) in the repository.
+Check out [sample.c](https://github.com/Erfaniaa/compilers-course-project/blob/master/sample.c) in the repository (to see the language features).
 
     python3 run.py sample.c
 
