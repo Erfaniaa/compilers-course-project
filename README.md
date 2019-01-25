@@ -39,5 +39,5 @@ Check out [sample.c](https://github.com/Erfaniaa/compilers-course-project/blob/m
 
 - This project was done by [Ali Mirjahani](https://github.com/alimirjahani7) and [Erfan Alimohammadi](https://github.com/erfaniaa) in 2019 for the [Shahid Beheshti University](http://en.sbu.ac.ir) Compilers Course project.
 - You can modify the codes and produce your own programming language. There are not much hard-codes, so editing the language grammar would be easy. Grammar rules files have ".in" extension in the repository.
-- There are no switch-case statements in the scanner FSM part. Just draw your DFA graph on a paper, and enter the graph nodes and edges in the scanner; it will work for you!
+- There are no switch-case statements in the scanner finite-state machine part. Just draw your DFA graph on a paper, and enter the graph nodes and edges in the scanner; it will work for you! So, modifying scanner DFA (adding and removing edges) doesn't take time from you.
 - This project uses a LL(1) parser (which is implemented by us) and a LALR parser (which is lark-parser, for parsing the boolean expressions). It switches between these two parsers, according to its state.
